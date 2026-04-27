@@ -1,172 +1,141 @@
 # 🚀 AERO – Vanguard Game Platform
 
-![Status](https://img.shields.io/badge/Status-In%20Progress-blue)
-![Frontend](https://img.shields.io/badge/Frontend-React%20(Vite)-61DAFB)
-![Backend](https://img.shields.io/badge/Backend-Node.js-green)
-![Database](https://img.shields.io/badge/Database-MongoDB-brightgreen)
-![UI](https://img.shields.io/badge/UI-TailwindCSS-blueviolet)
-![RealTime](https://img.shields.io/badge/Realtime-Socket.IO-black)
+AERO is a modern, interactive platform designed to manage team-based activities within a Vanguard. It helps teams coordinate weekly games, make decisions through voting, track performance, and maintain a structured workflow in a fun and engaging way.
 
----
+## 🎯 Problem Statement
 
-AERO is a modern, interactive platform designed for a Vanguard (30-member team) to manage weekly games, collaborate, vote, and track performance in a fun and structured way.
+In our batch, 120 students are divided into 4 Vanguards, each with 30 members. Every week, one Vanguard organizes a game.
 
-It combines features of chat apps, polling systems, and sports dashboards into one unified experience.
+Previously, coordination was done using WhatsApp, which led to:
+- ❌ Unstructured discussions
+- ❌ Messages getting lost
+- ❌ No clear decision-making process
+- ❌ No record of past games
+- ❌ No performance tracking
 
----
+## 💡 Solution
 
-## 🎯 Project Purpose
-
-The platform is built to solve a real-world use case:
-
-- A batch has multiple teams (Vanguards)  
-- Every week, one team organizes a game  
-- Members need to:  
-  - Discuss 💬  
-  - Decide games 🗳️  
-  - Track participation 👥  
-  - Maintain performance 📊  
-
-AERO simplifies this entire workflow into a single platform.
+AERO solves this by providing a centralized platform where all activities are managed in a structured flow:
+**Discuss → Vote → Schedule → Play → Track**
 
 ---
 
 ## ✨ Key Features
 
 ### 💬 Real-Time Chat
-- Group chat for all 30 members  
-- Instant messaging (Socket-based)  
-- Smooth and interactive UI  
+- Group chat for all members
+- Instant communication
+- Organized discussion
 
 ### 🗳️ Poll System
-- Create polls for game selection  
-- Members vote for preferred games  
-- Highest voted game gets selected  
+- Create polls to decide games
+- Members vote
+- Highest voted game is selected
 
 ### 📅 Event & Game Scheduling
-- Weekly (Wednesday) game tracking  
-- Manual event editing support  
-- Event history maintained  
+- Weekly game scheduling (Wednesday)
+- Manual event editing
+- Organized calendar view
 
-### 👥 Game Check-In (Attendance Alternative)
-- Track who played and who didn’t  
-- Admin marks participation  
-- Used for stats and leaderboard  
-
-### 🏆 Leaderboard
-- Tracks performance of members  
-- Points system based on:  
-  - Participation  
-  - Wins  
-  - MVP  
-
-### 🌟 Wall of Fame
-- Highlights top performers  
-- Displays MVPs and achievements  
-- Motivates team participation  
+### 👥 Game Check-In
+- Track who played and who didn’t
+- Works like attendance system
+- Used for performance tracking
 
 ### 📊 Game History
-- Stores past matches  
-- Shows:  
-  - Game name  
-  - Date  
-  - Scores  
-  - Winner  
+- Stores all past games
+- Shows: Game name, Date, Scores, Winner
 
-### 🔔 Notifications System
-- Real-time in-app notifications  
-- Updates for:  
-  - New polls  
-  - Messages  
-  - Events  
+### 🏆 Leaderboard
+- Tracks performance of members
+- Points based on: Participation, Wins, Achievements
 
-### 🛡️ Admin Panel (Separate System)
-- Admin login (separate from users)  
-- Manage:  
-  - Polls  
-  - Game results  
-  - Events  
-  - Members  
+### 🌟 Wall of Fame
+- Highlights top performers
+- Displays MVPs
+- Encourages competition
+
+### 🔔 Notifications
+- Real-time updates
+- Alerts for: New polls, Messages, Events
+
+### 🛡️ Admin Panel
+- Separate admin access
+- Manage: Polls, Events, Results, Members
 
 ---
 
-## 🎨 UI/UX Highlights
-
-- Clean light blue AERO theme  
-- Floating top navbar  
-- Smooth animations and transitions  
-- Scroll-based effects  
-- Premium UI with modern design principles  
+## 🎨 UI / UX Highlights
+- Clean and modern light-blue theme
+- Floating navbar
+- Smooth animations and transitions
+- Scroll-based effects
+- Premium interactive design
 
 ---
 
 ## 🧠 Tech Stack
 
 ### Frontend
-- React (Vite) ⚛️  
-- Tailwind CSS 🎨  
-- Redux Toolkit 🧠  
-- React Router 🌐  
+- **Framework**: React (Vite)
+- **Styling**: Tailwind CSS
+- **State**: Redux Toolkit
+- **Routing**: React Router
+- **Animations**: Framer Motion
+- **Scrolling**: Lenis
+- **3D**: React Three Fiber / Spline
+- **API**: Axios & Socket.IO Client
 
 ### Backend (Planned)
-- Node.js ⚙️  
-- Express 🚀  
-- MongoDB 🗄️  
-
-### Advanced Features
-- Socket.IO (real-time updates) ⚡  
-- Framer Motion (animations) 🎬  
-- 3D integration (React Three Fiber / Spline) 🧊  
-- Lenis (smooth scrolling) 🌊  
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **Database**: MongoDB & Mongoose
+- **Real-time**: Socket.IO
+- **Security**: JWT Authentication
 
 ---
 
+## 🔁 System Architecture
+```
+Frontend (React)
+        ↓
+API & Socket Requests
+        ↓
+Backend (Node.js + Express)
+        ↓
+Database (MongoDB)
+```
+
 ## 📁 Project Structure
-
-```
-frontend/
-backend/
-```
-
-- `frontend/` → UI, components, pages, client logic  
-- `backend/` → APIs, controllers, database logic  
+- `frontend/` → UI & Client-side logic
+- `backend/` → Server & API logic
 
 ---
 
 ## 🚧 Current Status
+- ✅ Login page is implemented
+- ✅ UI design is completed in Figma
+- ✅ Basic frontend setup is ready
 
-- Project structure initialized  
-- UI design and frontend in progress  
-- Advanced animations and 3D integration planned  
-
----
-
-## 🎯 Future Enhancements
-
-- Full real-time system integration  
-- Push notifications  
-- Mobile app (React Native)  
-- AI-based insights (game suggestions, summaries)  
-
----
-
-## 👨‍💻 Developed For
-
-Vanguard team-based coordination and game management system.
+## 🔮 Future Enhancements
+- 🔹 Full frontend development (Dashboard, Chat, Polls, etc.)
+- 🔹 Backend API development using Node.js and Express
+- 🔹 Database integration with MongoDB
+- 🔹 Real-time features using Socket.IO
+- 🔹 Game scheduling and calendar system
+- 🔹 Leaderboard and performance tracking system
+- 🔹 Admin panel functionality
+- 🔹 Push notifications
+- 🔹 Mobile app (React Native)
 
 ---
 
-## 💡 Final Vision
+## 🎯 Final Vision
+AERO aims to become a complete team management and activity coordination platform that is: **Structured, Interactive, Performance-driven, and Visually engaging.**
 
-AERO aims to become a complete team management and gaming coordination platform that is:
-
-- Interactive  
-- Engaging  
-- Performance-driven  
-- Visually premium  
+**👨‍💻 Developed For**: Vanguard team-based game coordination and activity management.
 
 ---
 
-## ⭐ Support
-
-If you like this project, give it a ⭐ on GitHub and share it 🚀
+## 🧾 Summary
+AERO transforms unstructured communication into a well-organized system that improves teamwork, decision-making, and engagement.

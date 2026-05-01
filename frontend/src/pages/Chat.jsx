@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { addMessage } from '../redux/slices/chatSlice';
+import { io } from 'socket.io-client';
 import { 
   Send, User, Phone, Video, MoreVertical, Search, 
   Paperclip, Smile, Shield, Radio, Activity, Terminal,
@@ -12,6 +13,8 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 import { GlassPanel, AeroButton } from '../components/AeroUI';
+
+const socket = io('http://localhost:5000');
 
 const Chat = () => {
   const dispatch = useDispatch();
@@ -38,6 +41,17 @@ const Chat = () => {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    // Listen for incoming real-time messages
+    socket.on('receiveMessage', (messageData) => {
+      dispatch(addMessage(messageData));
+    });
+
+    return () => {
+      socket.off('receiveMessage');
+    };
+  }, [dispatch]);
+
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (!inputText.trim() && !attachedFile) return;
@@ -53,7 +67,7 @@ const Chat = () => {
       };
     }
 
-    dispatch(addMessage({
+    const newMessage = {
       id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       sender: user.name,
       senderId: user.id || user.accountId || user.name, // Ensure we have a senderId for filtering
@@ -61,7 +75,11 @@ const Chat = () => {
       timestamp: new Date().toISOString(),
       isAdmin: user.role === 'admin',
       file: fileData
-    }));
+    };
+
+    dispatch(addMessage(newMessage));
+    socket.emit('sendMessage', newMessage);
+
     
     setInputText('');
     setAttachedFile(null);

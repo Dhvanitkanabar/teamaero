@@ -33,7 +33,7 @@ const pollSlice = createSlice({
     votePoll: (state, action) => {
       const { pollId, optionId, userName } = action.payload;
       const poll = state.polls.find(p => p.id === pollId);
-      if (poll) {
+      if (poll && poll.active) {
         poll.options.forEach(opt => {
           if (opt.voters) {
              opt.voters = opt.voters.filter(v => v !== userName);

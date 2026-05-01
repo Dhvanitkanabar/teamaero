@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addPoll, togglePollStatus } from '../redux/slices/pollSlice';
-import { updateCalendarEvent } from '../redux/slices/eventSlice';
+import { updateCalendarEvent, deleteCalendarEvent } from '../redux/slices/eventSlice';
 import { updateTeamScore, updateDailyBest } from '../redux/slices/leaderboardSlice';
 import { addNotification } from '../redux/slices/notificationSlice';
 import { 
@@ -409,7 +409,10 @@ const AdminControl = () => {
                                        </div>
                                     </div>
                                  </div>
-                                 <button className="w-10 h-10 rounded-xl bg-slate-50 text-slate-300 hover:bg-rose-50 hover:text-rose-600 transition-all flex items-center justify-center border border-slate-100">
+                                 <button 
+                                    onClick={() => dispatch(deleteCalendarEvent(date))}
+                                    className="w-10 h-10 rounded-xl bg-slate-50 text-slate-300 hover:bg-rose-50 hover:text-rose-600 transition-all flex items-center justify-center border border-slate-100"
+                                 >
                                     <Trash2 size={18} />
                                  </button>
                               </div>

@@ -46,9 +46,15 @@ const eventSlice = createSlice({
       state.calendarEvents[date] = data;
       localStorage.setItem('vanguard_calendar', JSON.stringify(state.calendarEvents));
       syncChannel.postMessage({ type: 'EVENTS_UPDATED' });
+    },
+    deleteCalendarEvent: (state, action) => {
+      const date = action.payload;
+      delete state.calendarEvents[date];
+      localStorage.setItem('vanguard_calendar', JSON.stringify(state.calendarEvents));
+      syncChannel.postMessage({ type: 'EVENTS_UPDATED' });
     }
   },
 });
 
-export const { addEvent, updateActiveMatch, setEvents, rehydrateEvents, updateCalendarEvent } = eventSlice.actions;
+export const { addEvent, updateActiveMatch, setEvents, rehydrateEvents, updateCalendarEvent, deleteCalendarEvent } = eventSlice.actions;
 export default eventSlice.reducer;

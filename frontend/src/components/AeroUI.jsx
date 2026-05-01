@@ -24,23 +24,23 @@ export const AeroCard = ({ children, className = "", delay = 0 }) => (
 );
 
 export const StatCard = ({ label, value, icon: Icon, trend, color = "sky" }) => (
-  <AeroCard className="min-w-[240px]">
-    <div className="flex items-center justify-between mb-8">
-      <div className={`w-12 h-12 rounded-[20px] bg-white shadow-xl flex items-center justify-center text-sky-600 group-hover:scale-110 transition-transform duration-700`}>
-        <Icon size={24} />
+  <AeroCard className="w-full">
+    <div className="flex items-center justify-between mb-6 md:mb-8">
+      <div className={`w-10 h-10 md:w-12 md:h-12 rounded-[16px] md:rounded-[20px] bg-white shadow-xl flex items-center justify-center text-sky-600 group-hover:scale-110 transition-transform duration-700`}>
+        <Icon size={20} className="md:size-24" />
       </div>
       {trend && (
-        <span className="px-4 py-1.5 bg-emerald-500/10 text-emerald-600 rounded-full text-[9px] font-bold uppercase tracking-widest backdrop-blur-md">
+        <span className="px-3 py-1 md:px-4 md:py-1.5 bg-emerald-500/10 text-emerald-600 rounded-full text-[8px] md:text-[9px] font-bold uppercase tracking-widest backdrop-blur-md">
           {trend}
         </span>
       )}
     </div>
-    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em] mb-2">{label}</p>
+    <p className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em] mb-2">{label}</p>
     <div className="flex items-baseline gap-2">
-      <span className="text-4xl font-black text-slate-950 tracking-tighter tabular-nums">{value}</span>
+      <span className="text-3xl md:text-4xl font-black text-slate-950 tracking-tighter tabular-nums">{value}</span>
       <div className="flex gap-1">
-        <div className="w-1 h-3 bg-sky-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-        <div className="w-1 h-1.5 bg-sky-200 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+        <div className="w-1 h-2.5 md:h-3 bg-sky-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+        <div className="w-1 h-1 md:h-1.5 bg-sky-200 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
       </div>
     </div>
   </AeroCard>

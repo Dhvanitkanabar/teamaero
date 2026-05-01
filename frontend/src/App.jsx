@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useDispatch } from 'react-redux';
 import { rehydratePolls } from './redux/slices/pollSlice';
 import { rehydrateTeams } from './redux/slices/leaderboardSlice';
+import { rehydrateEvents } from './redux/slices/eventSlice';
 import { addNotification } from './redux/slices/notificationSlice';
 import Login from './pages/Login';
 import Landing from './pages/Landing';
@@ -11,6 +12,7 @@ import Members from './pages/Members';
 import Chat from './pages/Chat';
 import Polls from './pages/Polls';
 import Leaderboard from './pages/Leaderboard';
+import Calendar from './pages/Calendar';
 import AdminControl from './pages/AdminControl';
 import { AeroSky } from './components/AeroSky';
 import Layout from './components/Layout';
@@ -41,6 +43,15 @@ function App() {
           icon: 'Trophy'
         }));
       }
+      if (event.data.type === 'EVENTS_UPDATED') {
+        dispatch(rehydrateEvents());
+        dispatch(addNotification({
+          title: 'Calendar Updated',
+          message: 'New events have been added to the community calendar.',
+          type: 'event',
+          icon: 'Calendar'
+        }));
+      }
     };
   }, [dispatch]);
 
@@ -57,6 +68,7 @@ function App() {
           <Route path="/chat" element={<Chat />} />
           <Route path="/polls" element={<Polls />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/calendar" element={<Calendar />} />
           <Route path="/admin/control" element={<AdminControl />} />
         </Route>
 

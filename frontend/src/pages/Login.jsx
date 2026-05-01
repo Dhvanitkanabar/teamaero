@@ -5,6 +5,7 @@ import { setUser } from '../redux/slices/authSlice';
 import { Shield, Lock, Mail, ArrowRight, UserCircle, Globe, Activity, Zap, Cpu, Terminal, Key, Fingerprint } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AeroButton, GlassPanel, AeroCard } from '../components/AeroUI';
+import SEO from '../components/SEO';
 
 const Login = () => {
   const [step, setStep] = useState(1);
@@ -73,6 +74,19 @@ const Login = () => {
 
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden p-6">
+      <SEO
+        title="Login"
+        description="Sign in to Vanguard AERO — your squadron operations command center. Enter your operator credentials to access the platform."
+        url="/login"
+        noindex={true}
+        schema={{
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          name: 'Login — Vanguard AERO',
+          description: 'Secure operator login for the Vanguard AERO platform.',
+          url: 'https://vanguard-aero.vercel.app/login',
+        }}
+      />
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}

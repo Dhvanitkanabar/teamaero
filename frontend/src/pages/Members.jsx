@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { AeroCard, AeroButton, GlassPanel, TechnicalDivider } from '../components/AeroUI';
+import SEO from '../components/SEO';
 
 const Members = () => {
   const { members } = useSelector((state) => state.user);
@@ -28,7 +29,25 @@ const Members = () => {
       animate="visible"
       className="space-y-16 pb-32 pt-16"
     >
+      <SEO
+        title="Members"
+        description="Browse all Vanguard AERO squadron members. View profiles, scores, and status of every operator in the community."
+        url="/members"
+        schema={{
+          '@context': 'https://schema.org',
+          '@type': 'ItemList',
+          name: 'Vanguard AERO Squadron Members',
+          description: 'Full roster of Vanguard AERO operators and community members.',
+          url: 'https://vanguard-aero.vercel.app/members',
+          itemListElement: members.slice(0, 10).map((m, i) => ({
+            '@type': 'ListItem',
+            position: i + 1,
+            name: m.name,
+          })),
+        }}
+      />
       {/* Community Directory Header */}
+
       <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 border-b border-slate-200 pb-12">
         <div className="space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-sky-50 text-sky-600 rounded-full text-[9px] font-bold uppercase tracking-widest border border-sky-100">

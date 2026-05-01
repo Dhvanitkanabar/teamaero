@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import { useSelector, useDispatch } from 'react-redux';
 import { AeroCard, AeroButton, GlassPanel, TechnicalDivider } from '../components/AeroUI';
 import { rehydrateTeams } from '../redux/slices/leaderboardSlice';
+import SEO from '../components/SEO';
 
 const Leaderboard = () => {
   const dispatch = useDispatch();
@@ -39,6 +40,24 @@ const Leaderboard = () => {
       animate="visible"
       className="space-y-20 pb-40 pt-16"
     >
+      <SEO
+        title="Leaderboard"
+        description="Vanguard AERO community rankings. See who topped the leaderboard today, this week, and all-time across the squadron."
+        url="/leaderboard"
+        schema={{
+          '@context': 'https://schema.org',
+          '@type': 'ItemList',
+          name: 'Vanguard AERO Community Leaderboard',
+          description: 'Ranked list of top-performing Vanguard AERO squadron members by score.',
+          url: 'https://vanguard-aero.vercel.app/leaderboard',
+          itemListElement: globalRankings.slice(0, 10).map((member, i) => ({
+            '@type': 'ListItem',
+            position: i + 1,
+            name: member.name,
+            description: `Score: ${member.score || 0}`,
+          })),
+        }}
+      />
       {/* Cinematic Header */}
       <header className="relative flex flex-col lg:flex-row lg:items-end justify-between gap-12 mb-20 border-b border-slate-100 pb-16">
         <div className="space-y-6 relative z-10">

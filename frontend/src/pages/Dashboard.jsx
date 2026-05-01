@@ -14,6 +14,7 @@ import { AeroCard, StatCard, GlassPanel, TechnicalDivider, AeroButton } from '..
 import { rehydrateTeams } from '../redux/slices/leaderboardSlice';
 import { rehydrateEvents } from '../redux/slices/eventSlice';
 import { format } from 'date-fns';
+import SEO from '../components/SEO';
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -68,6 +69,19 @@ const Dashboard = () => {
       animate="visible"
       className="space-y-8 md:space-y-12 pb-40 pt-10 md:pt-16 px-4 md:px-0"
     >
+      <SEO
+        title="Dashboard"
+        description={`Welcome back, ${user?.name || 'Operator'}. View your squadron stats, upcoming events, and live performance metrics on the Vanguard AERO command interface.`}
+        url="/dashboard"
+        schema={{
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          name: 'Dashboard — Vanguard AERO',
+          description: 'Squadron command interface with real-time stats, event calendar, and team performance metrics.',
+          url: 'https://vanguard-aero.vercel.app/dashboard',
+          isPartOf: { '@type': 'WebSite', name: 'Vanguard AERO', url: 'https://vanguard-aero.vercel.app' },
+        }}
+      />
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
          <motion.div variants={itemVariants} className="lg:col-span-8">
             <div className="h-full bg-white rounded-[32px] md:rounded-[48px] border border-slate-100 shadow-xl shadow-slate-200/50 p-8 md:p-12 lg:p-16 relative overflow-hidden flex flex-col justify-between group">

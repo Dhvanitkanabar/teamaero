@@ -4,10 +4,45 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>aero-web</title>
+
+    <!-- Primary SEO (fallback before React hydrates) -->
+    <title>Vanguard AERO — Squadron Operations Platform</title>
+    <meta name="description" content="Vanguard AERO is a real-time squadron management and operations platform for coordinated team performance, leaderboards, polls, and live communication." />
+    <meta name="theme-color" content="#0ea5e9" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Vanguard AERO — Squadron Operations Platform" />
+    <meta property="og:description" content="Real-time squadron management, leaderboards, polls, and live communication for Vanguard teams." />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:site_name" content="Vanguard AERO" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Vanguard AERO — Squadron Operations Platform" />
+    <meta name="twitter:description" content="Real-time squadron management, leaderboards, polls, and live communication." />
+    <meta name="twitter:image" content="/og-image.png" />
+
+    <!-- Structured Data: WebSite schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Vanguard AERO",
+      "url": "https://vanguard-aero.vercel.app",
+      "description": "A real-time squadron management and operations platform for Vanguard teams.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://vanguard-aero.vercel.app/members?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
+

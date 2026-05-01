@@ -9,7 +9,8 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 import { AeroButton } from '../components/AeroUI';
-import socket from '../services/socket'; // shared singleton — same as Layout
+import socket from '../services/socket';
+import SEO from '../components/SEO';
 
 const Chat = () => {
   const dispatch = useDispatch();
@@ -102,6 +103,19 @@ const Chat = () => {
 
   return (
     <>
+      <SEO
+        title="Community Forum"
+        description="Real-time community forum for Vanguard AERO operators. Send messages, share files, and start live voice and video calls."
+        url="/chat"
+        noindex={true}
+        schema={{
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          name: 'Community Forum — Vanguard AERO',
+          description: 'Real-time group messaging and calling hub for Vanguard AERO squadron members.',
+          url: 'https://vanguard-aero.vercel.app/chat',
+        }}
+      />
       <div className="h-[calc(100vh-160px)] lg:h-[calc(100vh-180px)] mb-0 px-4 lg:px-6 max-w-5xl mx-auto relative overflow-hidden">
         <div className="h-full flex flex-col overflow-hidden vanguard-glass rounded-[32px] border-white/50 shadow-2xl bg-white/70">
 

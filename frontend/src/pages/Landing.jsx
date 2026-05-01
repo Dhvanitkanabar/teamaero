@@ -7,6 +7,7 @@ import {
 import { Link } from 'react-router-dom';
 import TopAero from '../components/TopAero';
 import SplineScene from '../components/SplineScene';
+import SEO from '../components/SEO';
 
 const Landing = () => {
   const containerVariants = {
@@ -28,6 +29,22 @@ const Landing = () => {
 
   return (
     <div className="relative min-h-screen bg-transparent selection:bg-sky-100 selection:text-sky-900">
+      <SEO
+        title="Home"
+        description="Vanguard AERO — A real-time squadron management platform for high-performance teams. Track metrics, coordinate games, and communicate live."
+        url="/"
+        schema={{
+          '@context': 'https://schema.org',
+          '@type': 'SoftwareApplication',
+          name: 'Vanguard AERO',
+          applicationCategory: 'BusinessApplication',
+          operatingSystem: 'Web',
+          url: 'https://vanguard-aero.vercel.app',
+          description: 'Real-time squadron management and operations platform for Vanguard teams.',
+          offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+          featureList: ['Real-time leaderboards', 'Live voice & video calls', 'Team polls', 'Event calendar', 'Member management'],
+        }}
+      />
       {/* 3. Pre-Hero Branding */}
       <TopAero />
       

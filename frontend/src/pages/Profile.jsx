@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { User, Mail, ShieldCheck, LogOut, Settings, Award, Activity, Zap, Cpu, Key, ChevronRight, Terminal } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { AeroCard, AeroButton, GlassPanel, TechnicalDivider } from '../components/AeroUI';
+import SEO from '../components/SEO';
 
 const Profile = () => {
   const { user } = useSelector((state) => state.auth);
@@ -41,6 +42,24 @@ const Profile = () => {
       animate="visible"
       className="max-w-7xl mx-auto space-y-16 pb-32 pt-16"
     >
+      <SEO
+        title={`${user.name}'s Profile`}
+        description={`View ${user.name}'s Vanguard AERO operator profile, squadron stats, achievements, and account details.`}
+        url="/profile"
+        noindex={true}
+        schema={{
+          '@context': 'https://schema.org',
+          '@type': 'ProfilePage',
+          name: `${user.name} — Vanguard AERO`,
+          url: 'https://vanguard-aero.vercel.app/profile',
+          mainEntity: {
+            '@type': 'Person',
+            name: user.name,
+            identifier: user.accountId || user.id,
+            jobTitle: user.role,
+          },
+        }}
+      />
       {/* Identity Portfolio Header */}
       <motion.header 
          variants={itemVariants}

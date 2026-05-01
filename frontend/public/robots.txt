@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /dashboard
+Allow: /members
+Allow: /leaderboard
+Allow: /calendar
+Allow: /polls
+
+# Disallow private/authenticated pages from indexing
+Disallow: /chat
+Disallow: /profile
+Disallow: /admin
+
+Sitemap: https://vanguard-aero.vercel.app/sitemap.xml

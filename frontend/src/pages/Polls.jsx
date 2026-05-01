@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AeroCard, AeroButton, GlassPanel, TechnicalDivider } from '../components/AeroUI';
+import SEO from '../components/SEO';
 
 const Polls = () => {
   const dispatch = useDispatch();
@@ -37,6 +38,19 @@ const Polls = () => {
       animate="visible"
       className="space-y-16 pb-32 pt-20 px-4 lg:px-0"
     >
+      <SEO
+        title="Community Polls"
+        description="Vote on active Vanguard AERO community polls. Your voice shapes the direction of squadron decisions and events."
+        url="/polls"
+        noindex={true}
+        schema={{
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          name: 'Community Polls — Vanguard AERO',
+          description: 'Active voting polls for the Vanguard AERO community.',
+          url: 'https://vanguard-aero.vercel.app/polls',
+        }}
+      />
       {/* Light-Themed Modern Header */}
       <header className="relative max-w-6xl mx-auto flex flex-col lg:flex-row lg:items-end justify-between gap-12 border-b border-slate-100 pb-16">
         <div className="space-y-6 relative z-10">

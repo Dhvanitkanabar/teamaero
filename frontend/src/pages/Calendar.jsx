@@ -12,6 +12,7 @@ import {
   eachDayOfInterval, isWednesday
 } from 'date-fns';
 import { AeroCard, AeroButton, GlassPanel, TechnicalDivider } from '../components/AeroUI';
+import SEO from '../components/SEO';
 
 const Calendar = () => {
   const { calendarEvents } = useSelector((state) => state.event);
@@ -41,6 +42,18 @@ const Calendar = () => {
       animate="visible"
       className="space-y-16 pb-32 pt-16"
     >
+      <SEO
+        title="Calendar"
+        description="Vanguard AERO community calendar. Browse and track scheduled events, group sessions, and upcoming squadron milestones."
+        url="/calendar"
+        schema={{
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          name: 'Community Calendar — Vanguard AERO',
+          description: 'Browse upcoming Vanguard AERO community events, group sessions, and squadron milestones.',
+          url: 'https://vanguard-aero.vercel.app/calendar',
+        }}
+      />
       {/* Community Calendar Header */}
       <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 border-b border-slate-200 pb-12">
         <div className="space-y-4">

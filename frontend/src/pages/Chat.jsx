@@ -1,19 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { addMessage } from '../redux/slices/chatSlice';
-import { io } from 'socket.io-client';
 import { 
   Send, Phone, Video, MoreVertical,
   Paperclip, Smile, MessageSquare,
-  Image as ImageIcon, FileText, X, Download, File, MicOff, VideoOff
+  Image as ImageIcon, FileText, X, Download, File
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 import { AeroButton } from '../components/AeroUI';
-import CallModal from '../components/CallModal';
-
-// Shared socket instance — persists across re-renders at module scope
-const socket = io('http://localhost:5000', { autoConnect: true });
+import socket from '../services/socket'; // shared singleton — same as Layout
 
 const Chat = () => {
   const dispatch = useDispatch();
@@ -36,16 +32,8 @@ const Chat = () => {
 
   useEffect(() => { scrollToBottom(); }, [messages]);
 
-  // Register with signaling server so this user can receive call invitations
-  useEffect(() => {
-    if (!user) return;
-    socket.emit('register', {
-      userId: user.id || user.accountId || user.name,
-      userName: user.name,
-    });
-  }, [user]);
-
   // Listen for chat messages from other users
+  // (Registration is handled globally by Layout.jsx)
   useEffect(() => {
     socket.on('receiveMessage', (messageData) => {
       dispatch(addMessage(messageData));
@@ -108,15 +96,12 @@ const Chat = () => {
     '⚡', '💻', '🌐', '🎮', '💡', '🌟', '🛠️', '🔒',
   ];
 
-  // Trigger real WebRTC calls via CallModal's window-exposed function
+  // Trigger real WebRTC calls via CallModal (mounted globally in Layout)
   const handleVoiceCall = () => { if (window.__vanguardInitiateCall) window.__vanguardInitiateCall('voice'); };
   const handleVideoCall = () => { if (window.__vanguardInitiateCall) window.__vanguardInitiateCall('video'); };
 
   return (
     <>
-      {/* CallModal handles all incoming/outgoing call states */}
-      <CallModal socket={socket} user={user} />
-
       <div className="h-[calc(100vh-160px)] lg:h-[calc(100vh-180px)] mb-0 px-4 lg:px-6 max-w-5xl mx-auto relative overflow-hidden">
         <div className="h-full flex flex-col overflow-hidden vanguard-glass rounded-[32px] border-white/50 shadow-2xl bg-white/70">
 
@@ -314,3 +299,4 @@ const Chat = () => {
 };
 
 export default Chat;
+

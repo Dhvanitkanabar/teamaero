@@ -12,6 +12,9 @@ import { AeroButton } from '../components/AeroUI';
 import socket from '../services/socket';
 import SEO from '../components/SEO';
 import useToast from '../hooks/useToast';
+import FileUploadZone from '../components/FileUploadZone';
+import LiveIndicator from '../components/LiveIndicator';
+import analytics from '../services/analytics';
 
 const Chat = () => {
   const dispatch = useDispatch();
@@ -24,6 +27,7 @@ const Chat = () => {
   const [inputText, setInputText] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [attachedFile, setAttachedFile] = useState(null);
+  const [showUploadZone, setShowUploadZone] = useState(false);
   const toast = useToast();
 
   const messagesEndRef = useRef(null);
@@ -70,12 +74,11 @@ const Chat = () => {
 
     dispatch(addMessage(newMessage));
     socket.emit('sendMessage', newMessage);
-
-    // Toast only for file sends — avoid spamming on every text message
+    analytics.messageSent(!!fileData);
     if (fileData) {
+      analytics.fileUploaded(fileData.type, (attachedFile?.size / (1024 * 1024)).toFixed(2));
       toast.success('File Shared', `"${fileData.name}" sent to the forum.`);
     }
-
     setInputText('');
     setAttachedFile(null);
     setShowEmojiPicker(false);
@@ -97,6 +100,13 @@ const Chat = () => {
       setAttachedFile(file);
       toast.info('File Ready', `"${file.name}" attached. Press send to share.`);
     }
+  };
+
+  const handleFileSelected = (file) => {
+    if (!file) return;
+    setAttachedFile(file);
+    setShowUploadZone(false);
+    toast.info('File Ready', `"${file.name}" attached. Press send to share.`);
   };
 
   const addEmoji = (emoji) => setInputText(prev => prev + emoji);
@@ -138,10 +148,7 @@ const Chat = () => {
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <h2 className="text-lg font-black text-slate-950 tracking-tight truncate">Community Forum</h2>
-                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 rounded-full">
-                    <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[8px] font-black uppercase tracking-widest text-emerald-600">Live</span>
-                  </div>
+                  <LiveIndicator variant="badge" showText={false} />
                 </div>
               </div>
             </div>
@@ -292,10 +299,47 @@ const Chat = () => {
               )}
             </AnimatePresence>
 
+            <AnimatePresence>
+              {showUploadZone && (
+                <motion.div
+                  initial={{ opacity: 0, y: 12, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.97 }}
+                  transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                  className="absolute bottom-full mb-3 left-4 lg:left-6 right-4 lg:right-6 z-50"
+                >
+                  <div className="bg-white rounded-[24px] shadow-2xl border border-slate-100 p-5">
+                    <div className="flex items-center justify-between mb-4">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Attach File</p>
+                      <button
+                        onClick={() => setShowUploadZone(false)}
+                        aria-label="Close file upload"
+                        className="w-7 h-7 rounded-xl flex items-center justify-center text-slate-300 hover:text-slate-950 hover:bg-slate-50 transition-all"
+                      >
+                        <X size={14} aria-hidden="true" />
+                      </button>
+                    </div>
+                    <FileUploadZone
+                      onFilesSelected={handleFileSelected}
+                      maxSizeMB={10}
+                      multiple={false}
+                      label="Drop a file or click to browse"
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <form onSubmit={handleSendMessage} className="flex items-center gap-3 max-w-4xl mx-auto bg-white p-2 rounded-2xl border border-slate-100 shadow-xl relative z-10">
               <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
-              <button type="button" onClick={() => fileInputRef.current?.click()} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${attachedFile ? 'bg-sky-50 text-sky-600' : 'text-slate-300 hover:text-sky-600 hover:bg-slate-50'}`}>
-                <Paperclip size={20} />
+              <button
+                type="button"
+                onClick={() => setShowUploadZone(!showUploadZone)}
+                aria-label="Attach a file"
+                aria-expanded={showUploadZone}
+                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${attachedFile || showUploadZone ? 'bg-sky-50 text-sky-600' : 'text-slate-300 hover:text-sky-600 hover:bg-slate-50'}`}
+              >
+                <Paperclip size={20} aria-hidden="true" />
               </button>
 
               <input

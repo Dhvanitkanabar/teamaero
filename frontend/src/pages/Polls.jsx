@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AeroCard, AeroButton, GlassPanel, TechnicalDivider } from '../components/AeroUI';
 import SEO from '../components/SEO';
 import useToast from '../hooks/useToast';
+import analytics from '../services/analytics';
 
 const Polls = () => {
   const dispatch = useDispatch();

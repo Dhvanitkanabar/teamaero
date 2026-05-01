@@ -5,6 +5,7 @@ import PageTransition from './PageTransition';
 import Navbar from './Navbar';
 import CallModal from './CallModal';
 import ToastContainer from './ToastContainer';
+import LiveIndicator from './LiveIndicator';
 import socket from '../services/socket';
 
 const Layout = ({ showNavbar = true }) => {
@@ -47,6 +48,9 @@ const Layout = ({ showNavbar = true }) => {
 
       {/* Global toast system — always mounted */}
       <ToastContainer />
+
+      {/* Real-time connection bar — shows amber/red strip when disconnected */}
+      <LiveIndicator variant="bar" />
 
       {/* Global call modal — always mounted so rings work on every page */}
       <CallModal socket={socket} user={user} />

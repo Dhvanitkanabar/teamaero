@@ -22,11 +22,13 @@ import WallOfFame from './pages/WallOfFame';
 import { AeroSky } from './components/AeroSky';
 import Layout from './components/Layout';
 import { ProtectedRoute } from './components/AuthGuard';
+import useAnalytics from './hooks/useAnalytics';
 
 const syncChannel = new BroadcastChannel('vanguard_sync');
 
 function App() {
   const dispatch = useDispatch();
+  useAnalytics(); // auto page-view tracking on every route change
 
   useEffect(() => {
     syncChannel.onmessage = (event) => {

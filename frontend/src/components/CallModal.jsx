@@ -1,37 +1,38 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Phone, PhoneOff, Video, VideoOff, Mic, MicOff, X } from 'lucide-react';
+import { Phone, PhoneOff, Video, VideoOff, Mic, MicOff } from 'lucide-react';
 
-// STUN servers for ICE candidate negotiation (free Google STUN)
 const ICE_SERVERS = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
   ],
 };
 
-/**
- * CallModal — manages all call states:
- *  - IDLE: hidden
- *  - RINGING_OUT: caller is waiting for someone to pick up
- *  - RINGING_IN: callee sees the incoming call notification
- *  - IN_CALL: live WebRTC audio/video session
- */
 const CallModal = ({ socket, user }) => {
   const [callState, setCallState] = useState('IDLE'); // IDLE | RINGING_OUT | RINGING_IN | IN_CALL
-  const [callType, setCallType] = useState(null);     // 'voice' | 'video'
-  const [remoteInfo, setRemoteInfo] = useState(null); // { name, socketId }
-
+  const [callType, setCallType] = useState(null);
+  const [remoteInfo, setRemoteInfo] = useState(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isCamOff, setIsCamOff] = useState(false);
+
+  // Keep refs in sync with state so async callbacks always read latest values
+  const callTypeRef = useRef(null);
+  const callStateRef = useRef('IDLE');
+  const remoteInfoRef = useRef(null);
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const peerConnectionRef = useRef(null);
   const localStreamRef = useRef(null);
-  const ringtoneRef = useRef(null);
 
-  // ─── Cleanup helper ─────────────────────────────────────────────────────────
+  // Helper to update both state and ref together
+  const setCallTypeSynced = (val) => { callTypeRef.current = val; setCallType(val); };
+  const setCallStateSynced = (val) => { callStateRef.current = val; setCallState(val); };
+  const setRemoteInfoSynced = (val) => { remoteInfoRef.current = val; setRemoteInfo(val); };
+
+  // ─── Cleanup ─────────────────────────────────────────────────────────────────
   const cleanup = useCallback(() => {
     if (peerConnectionRef.current) {
       peerConnectionRef.current.close();
@@ -43,7 +44,10 @@ const CallModal = ({ socket, user }) => {
     }
     if (localVideoRef.current) localVideoRef.current.srcObject = null;
     if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
-    if (ringtoneRef.current) { ringtoneRef.current.pause(); ringtoneRef.current.currentTime = 0; }
+
+    callTypeRef.current = null;
+    callStateRef.current = 'IDLE';
+    remoteInfoRef.current = null;
     setCallState('IDLE');
     setCallType(null);
     setRemoteInfo(null);
@@ -51,7 +55,7 @@ const CallModal = ({ socket, user }) => {
     setIsCamOff(false);
   }, []);
 
-  // ─── Get local media stream ──────────────────────────────────────────────────
+  // ─── Get local media ──────────────────────────────────────────────────────────
   const getLocalStream = useCallback(async (type) => {
     const constraints = {
       audio: true,
@@ -63,96 +67,81 @@ const CallModal = ({ socket, user }) => {
     return stream;
   }, []);
 
-  // ─── Build PeerConnection ────────────────────────────────────────────────────
+  // ─── Build RTCPeerConnection ──────────────────────────────────────────────────
   const createPeerConnection = useCallback((targetSocketId) => {
     const pc = new RTCPeerConnection(ICE_SERVERS);
     peerConnectionRef.current = pc;
 
-    // Send ICE candidates to the remote peer via signaling server
     pc.onicecandidate = ({ candidate }) => {
       if (candidate) {
         socket.emit('webrtc:ice-candidate', { candidate, targetSocketId });
       }
     };
 
-    // When remote stream arrives → attach to remote video element
     pc.ontrack = (event) => {
       if (remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = event.streams[0];
       }
     };
 
+    pc.onconnectionstatechange = () => {
+      console.log('[WebRTC] Connection state:', pc.connectionState);
+    };
+
     return pc;
   }, [socket]);
 
-  // ─── OUTGOING call (caller side) ────────────────────────────────────────────
-  const initiateCall = useCallback(async (type) => {
-    if (!socket || !user) return;
-    setCallType(type);
-    setCallState('RINGING_OUT');
-
-    socket.emit('call:initiate', {
-      callType: type,
-      callerName: user.name,
-      callerId: user.id || user.accountId,
-    });
-  }, [socket, user]);
-
-  // ─── Socket event handlers ───────────────────────────────────────────────────
+  // ─── ALL socket event listeners — mounted ONCE, use refs for current values ──
   useEffect(() => {
     if (!socket) return;
 
-    // Someone else is calling us
-    const onIncoming = ({ callType, callerName, callerSocketId }) => {
-      setCallType(callType);
-      setRemoteInfo({ name: callerName, socketId: callerSocketId });
-      setCallState('RINGING_IN');
-      // Play ringtone
-      try {
-        const audio = new Audio('https://www.soundjay.com/phone/sounds/phone-ringing-1.mp3');
-        audio.loop = true;
-        audio.volume = 0.6;
-        ringtoneRef.current = audio;
-        audio.play().catch(() => {});
-      } catch (_) {}
+    // ── INCOMING CALL (callee receives this) ──────────────────────────────────
+    const onIncoming = ({ callType: type, callerName, callerSocketId }) => {
+      console.log('[Call] Incoming call from', callerName, 'type:', type);
+      // Don't interrupt an active call
+      if (callStateRef.current !== 'IDLE') return;
+
+      setCallTypeSynced(type);
+      setRemoteInfoSynced({ name: callerName, socketId: callerSocketId });
+      setCallStateSynced('RINGING_IN');
     };
 
-    // Our call was accepted by someone
+    // ── CALLER: someone accepted ──────────────────────────────────────────────
     const onAccepted = async ({ accepterSocketId, accepterName }) => {
-      setRemoteInfo({ name: accepterName, socketId: accepterSocketId });
-      if (ringtoneRef.current) { ringtoneRef.current.pause(); }
+      console.log('[Call] Accepted by', accepterName);
+      setRemoteInfoSynced({ name: accepterName, socketId: accepterSocketId });
+      const type = callTypeRef.current;
 
       try {
-        const stream = await getLocalStream(callType);
+        const stream = await getLocalStream(type);
         const pc = createPeerConnection(accepterSocketId);
-
-        // Add all local tracks to the connection
         stream.getTracks().forEach(track => pc.addTrack(track, stream));
 
-        // Create and send the WebRTC offer
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
         socket.emit('webrtc:offer', { offer, targetSocketId: accepterSocketId });
 
-        setCallState('IN_CALL');
+        setCallStateSynced('IN_CALL');
       } catch (err) {
-        console.error('Failed to start call after acceptance:', err);
+        console.error('[Call] Failed to create offer:', err);
         cleanup();
       }
     };
 
-    // Our call was declined
-    const onDeclined = () => {
-      if (ringtoneRef.current) { ringtoneRef.current.pause(); }
+    // ── CALLER: someone declined ──────────────────────────────────────────────
+    const onDeclined = ({ declinerName }) => {
+      console.log('[Call] Declined by', declinerName);
       cleanup();
     };
 
-    // Remote peer sent us an offer → we need to answer
+    // ── CALLEE: receives the WebRTC offer from caller ─────────────────────────
     const onOffer = async ({ offer, senderSocketId }) => {
-      try {
-        const stream = await getLocalStream(callType);
-        const pc = createPeerConnection(senderSocketId);
+      console.log('[Call] Received offer from', senderSocketId);
+      const type = callTypeRef.current; // read from ref, not stale state closure
 
+      try {
+        const stream = await getLocalStream(type);
+        const pc = createPeerConnection(senderSocketId);
         stream.getTracks().forEach(track => pc.addTrack(track, stream));
 
         await pc.setRemoteDescription(new RTCSessionDescription(offer));
@@ -160,37 +149,39 @@ const CallModal = ({ socket, user }) => {
         await pc.setLocalDescription(answer);
         socket.emit('webrtc:answer', { answer, targetSocketId: senderSocketId });
 
-        setCallState('IN_CALL');
+        setCallStateSynced('IN_CALL');
       } catch (err) {
-        console.error('Failed to handle offer:', err);
+        console.error('[Call] Failed to handle offer:', err);
         cleanup();
       }
     };
 
-    // Remote peer sent us their answer
+    // ── CALLER: receives the answer from callee ───────────────────────────────
     const onAnswer = async ({ answer }) => {
+      console.log('[Call] Received answer');
       try {
         if (peerConnectionRef.current) {
           await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(answer));
         }
       } catch (err) {
-        console.error('Failed to set remote description:', err);
+        console.error('[Call] Failed to set remote description:', err);
       }
     };
 
-    // New ICE candidate from remote peer
+    // ── ICE candidates ────────────────────────────────────────────────────────
     const onIceCandidate = async ({ candidate }) => {
       try {
         if (peerConnectionRef.current && candidate) {
           await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
         }
       } catch (err) {
-        console.error('Failed to add ICE candidate:', err);
+        console.error('[Call] Failed to add ICE candidate:', err);
       }
     };
 
-    // Remote peer hung up
+    // ── Remote peer hung up ───────────────────────────────────────────────────
     const onEnded = () => {
+      console.log('[Call] Call ended by remote');
       cleanup();
     };
 
@@ -202,6 +193,13 @@ const CallModal = ({ socket, user }) => {
     socket.on('webrtc:ice-candidate', onIceCandidate);
     socket.on('call:ended', onEnded);
 
+    // Debug: log all events received on this socket
+    socket.onAny((event, ...args) => {
+      if (event.startsWith('call:') || event.startsWith('webrtc:')) {
+        console.log('[Socket] Event received:', event, args);
+      }
+    });
+
     return () => {
       socket.off('call:incoming', onIncoming);
       socket.off('call:accepted', onAccepted);
@@ -210,62 +208,80 @@ const CallModal = ({ socket, user }) => {
       socket.off('webrtc:answer', onAnswer);
       socket.off('webrtc:ice-candidate', onIceCandidate);
       socket.off('call:ended', onEnded);
+      socket.offAny();
     };
-  }, [socket, callType, getLocalStream, createPeerConnection, cleanup]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socket]); // Only depend on socket — all other values read via refs
 
-  // ─── Accept incoming call ────────────────────────────────────────────────────
-  const acceptCall = useCallback(() => {
-    if (!remoteInfo) return;
-    if (ringtoneRef.current) { ringtoneRef.current.pause(); }
-    socket.emit('call:accept', {
-      callerSocketId: remoteInfo.socketId,
-      accepterName: user.name,
+  // ─── Initiate outgoing call ───────────────────────────────────────────────────
+  const initiateCall = useCallback((type) => {
+    if (!socket || !user) {
+      console.warn('[Call] Cannot initiate: socket or user missing');
+      return;
+    }
+    if (callStateRef.current !== 'IDLE') {
+      console.warn('[Call] Already in a call');
+      return;
+    }
+    console.log('[Call] Initiating', type, 'call as', user.name);
+    setCallTypeSynced(type);
+    setCallStateSynced('RINGING_OUT');
+    socket.emit('call:initiate', {
+      callType: type,
+      callerName: user.name,
+      callerId: user.id || user.accountId || user.name,
     });
-    // The caller will send us a WebRTC offer after this — handled in onOffer
-    setCallState('IN_CALL');
-  }, [remoteInfo, socket, user]);
+  }, [socket, user]);
 
-  // ─── Decline incoming call ───────────────────────────────────────────────────
-  const declineCall = useCallback(() => {
-    if (!remoteInfo) return;
-    socket.emit('call:decline', {
-      callerSocketId: remoteInfo.socketId,
-      declinerName: user.name,
-    });
-    cleanup();
-  }, [remoteInfo, socket, user, cleanup]);
-
-  // ─── End active call ─────────────────────────────────────────────────────────
-  const endCall = useCallback(() => {
-    socket.emit('call:end', {
-      targetSocketId: remoteInfo?.socketId || null,
-    });
-    cleanup();
-  }, [socket, remoteInfo, cleanup]);
-
-  // ─── Toggle mute ────────────────────────────────────────────────────────────
-  const toggleMute = useCallback(() => {
-    if (!localStreamRef.current) return;
-    localStreamRef.current.getAudioTracks().forEach(t => {
-      t.enabled = !t.enabled;
-    });
-    setIsMuted(prev => !prev);
-  }, []);
-
-  // ─── Toggle camera ───────────────────────────────────────────────────────────
-  const toggleCam = useCallback(() => {
-    if (!localStreamRef.current) return;
-    localStreamRef.current.getVideoTracks().forEach(t => {
-      t.enabled = !t.enabled;
-    });
-    setIsCamOff(prev => !prev);
-  }, []);
-
-  // Expose initiateCall to parent via window so Chat.jsx can trigger it
+  // Expose to window so chat header buttons can trigger it
   useEffect(() => {
     window.__vanguardInitiateCall = initiateCall;
     return () => { delete window.__vanguardInitiateCall; };
   }, [initiateCall]);
+
+  // ─── Accept incoming call ─────────────────────────────────────────────────────
+  const acceptCall = useCallback(() => {
+    const info = remoteInfoRef.current;
+    if (!info) return;
+    console.log('[Call] Accepting call from', info.name);
+    socket.emit('call:accept', {
+      callerSocketId: info.socketId,
+      accepterName: user.name,
+    });
+    setCallStateSynced('IN_CALL');
+  }, [socket, user]);
+
+  // ─── Decline incoming call ────────────────────────────────────────────────────
+  const declineCall = useCallback(() => {
+    const info = remoteInfoRef.current;
+    if (!info) return;
+    socket.emit('call:decline', {
+      callerSocketId: info.socketId,
+      declinerName: user.name,
+    });
+    cleanup();
+  }, [socket, user, cleanup]);
+
+  // ─── End active call ──────────────────────────────────────────────────────────
+  const endCall = useCallback(() => {
+    socket.emit('call:end', {
+      targetSocketId: remoteInfoRef.current?.socketId || null,
+    });
+    cleanup();
+  }, [socket, cleanup]);
+
+  // ─── Mute / Camera toggle ─────────────────────────────────────────────────────
+  const toggleMute = useCallback(() => {
+    if (!localStreamRef.current) return;
+    localStreamRef.current.getAudioTracks().forEach(t => { t.enabled = !t.enabled; });
+    setIsMuted(prev => !prev);
+  }, []);
+
+  const toggleCam = useCallback(() => {
+    if (!localStreamRef.current) return;
+    localStreamRef.current.getVideoTracks().forEach(t => { t.enabled = !t.enabled; });
+    setIsCamOff(prev => !prev);
+  }, []);
 
   if (callState === 'IDLE') return null;
 
@@ -278,47 +294,59 @@ const CallModal = ({ socket, user }) => {
         transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
         className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/80 backdrop-blur-xl"
       >
-        {/* ── Incoming Ring ── */}
+        {/* ── Incoming Ring ───────────────────────────────────────────────────── */}
         {callState === 'RINGING_IN' && (
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="bg-white rounded-[40px] p-12 max-w-sm w-full mx-4 shadow-2xl text-center space-y-8"
           >
+            {/* Pulsing avatar */}
             <div className="relative mx-auto w-32 h-32">
-              <div className="absolute inset-0 rounded-full bg-sky-100 animate-ping opacity-30" />
-              <div className="absolute inset-2 rounded-full bg-sky-100 animate-ping opacity-20 animation-delay-300" />
+              <div className="absolute inset-0 rounded-full bg-sky-200 animate-ping opacity-40" />
+              <div className="absolute inset-2 rounded-full bg-sky-100 animate-ping opacity-30" style={{ animationDelay: '0.3s' }} />
               <img
                 src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${remoteInfo?.name}`}
-                className="relative w-full h-full rounded-full border-4 border-sky-500 shadow-xl"
+                className="relative w-full h-full rounded-full border-4 border-sky-500 shadow-xl object-cover bg-sky-50"
                 alt="Caller"
               />
             </div>
+
             <div className="space-y-2">
-              <p className="text-[9px] font-black uppercase tracking-[0.3em] text-sky-500">
-                Incoming {callType === 'video' ? 'Video' : 'Voice'} Call
-              </p>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-sky-50 rounded-full border border-sky-100">
+                {callType === 'video' ? <Video size={12} className="text-sky-500" /> : <Phone size={12} className="text-sky-500" />}
+                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-sky-600">
+                  Incoming {callType === 'video' ? 'Video' : 'Voice'} Call
+                </p>
+              </div>
               <h2 className="text-3xl font-black text-slate-950 tracking-tight">{remoteInfo?.name}</h2>
               <p className="text-sm text-slate-400 font-medium">Requesting to connect...</p>
             </div>
-            <div className="flex items-center justify-center gap-6">
-              <button
-                onClick={declineCall}
-                className="w-20 h-20 bg-rose-500 hover:bg-rose-600 rounded-full flex items-center justify-center text-white shadow-xl shadow-rose-500/30 transition-all active:scale-95"
-              >
-                <PhoneOff size={28} />
-              </button>
-              <button
-                onClick={acceptCall}
-                className="w-20 h-20 bg-emerald-500 hover:bg-emerald-600 rounded-full flex items-center justify-center text-white shadow-xl shadow-emerald-500/30 transition-all active:scale-95"
-              >
-                <Phone size={28} />
-              </button>
+
+            <div className="flex items-center justify-center gap-8">
+              <div className="text-center space-y-2">
+                <button
+                  onClick={declineCall}
+                  className="w-20 h-20 bg-rose-500 hover:bg-rose-600 rounded-full flex items-center justify-center text-white shadow-xl shadow-rose-500/30 transition-all active:scale-95"
+                >
+                  <PhoneOff size={28} />
+                </button>
+                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Decline</p>
+              </div>
+              <div className="text-center space-y-2">
+                <button
+                  onClick={acceptCall}
+                  className="w-20 h-20 bg-emerald-500 hover:bg-emerald-600 rounded-full flex items-center justify-center text-white shadow-xl shadow-emerald-500/30 transition-all active:scale-95 animate-bounce"
+                >
+                  <Phone size={28} />
+                </button>
+                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Accept</p>
+              </div>
             </div>
           </motion.div>
         )}
 
-        {/* ── Outgoing Ringing ── */}
+        {/* ── Outgoing Ringing ─────────────────────────────────────────────────── */}
         {callState === 'RINGING_OUT' && (
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -327,9 +355,12 @@ const CallModal = ({ socket, user }) => {
           >
             <div className="relative mx-auto w-32 h-32">
               <div className="absolute inset-0 rounded-full bg-sky-500/20 animate-ping" />
-              <div className="absolute inset-4 rounded-full bg-sky-500/30 animate-ping animation-delay-300" />
+              <div className="absolute inset-4 rounded-full bg-sky-500/30 animate-ping" style={{ animationDelay: '0.4s' }} />
               <div className="relative w-full h-full rounded-full bg-slate-900 border-2 border-sky-500/50 flex items-center justify-center">
-                {callType === 'video' ? <Video size={48} className="text-sky-400" /> : <Phone size={48} className="text-sky-400" />}
+                {callType === 'video'
+                  ? <Video size={48} className="text-sky-400" />
+                  : <Phone size={48} className="text-sky-400" />
+                }
               </div>
             </div>
             <div className="space-y-2">
@@ -348,20 +379,19 @@ const CallModal = ({ socket, user }) => {
           </motion.div>
         )}
 
-        {/* ── Active Call ── */}
+        {/* ── Active Call ──────────────────────────────────────────────────────── */}
         {callState === 'IN_CALL' && (
           <div className="relative w-full h-full flex flex-col bg-slate-950">
-            {/* Remote Video (full screen) */}
+            {/* Remote video (full screen) */}
             <video
               ref={remoteVideoRef}
               autoPlay
               playsInline
               className="absolute inset-0 w-full h-full object-cover"
             />
-            {/* Dark overlay gradient at bottom */}
             <div className="absolute bottom-0 inset-x-0 h-64 bg-gradient-to-t from-slate-950 to-transparent pointer-events-none" />
 
-            {/* Local Video (pip) */}
+            {/* Local video PiP (draggable) */}
             {callType === 'video' && (
               <motion.div
                 drag
@@ -387,7 +417,7 @@ const CallModal = ({ socket, user }) => {
               </h2>
               <div className="flex items-center gap-2 mt-2">
                 <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Connected</span>
+                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Live</span>
               </div>
             </div>
 

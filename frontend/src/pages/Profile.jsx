@@ -1,15 +1,14 @@
 import React, { useMemo } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../redux/slices/authSlice';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { User, Mail, ShieldCheck, LogOut, Settings, Award, Activity, Zap, Cpu, Key, ChevronRight, Terminal } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { AeroCard, AeroButton, GlassPanel, TechnicalDivider } from '../components/AeroUI';
 import SEO from '../components/SEO';
+import useAuth from '../hooks/useAuth';
 
 const Profile = () => {
-  const { user } = useSelector((state) => state.auth);
-  const dispatch = useDispatch();
+  const { user, logout: logoutUser } = useAuth();
   const navigate = useNavigate();
 
   const memberId = useMemo(() => {
@@ -21,8 +20,7 @@ const Profile = () => {
   if (!user) return null;
 
   const handleLogout = () => {
-    dispatch(logout());
-    navigate('/login');
+    logoutUser(); // useAuth handles dispatch + navigate
   };
 
   const containerVariants = {

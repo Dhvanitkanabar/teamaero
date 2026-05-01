@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { 
   Users, Search, ShieldCheck, Star, Award, 
@@ -8,9 +8,21 @@ import {
 import { motion } from 'framer-motion';
 import { AeroCard, AeroButton, GlassPanel, TechnicalDivider } from '../components/AeroUI';
 import SEO from '../components/SEO';
+import useDebounce from '../hooks/useDebounce';
 
 const Members = () => {
   const { members } = useSelector((state) => state.user);
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 350);
+
+  // Filter members based on debounced search term
+  const filteredMembers = debouncedSearch.trim()
+    ? members.filter((m) =>
+        m.name?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        m.accountId?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        m.role?.toLowerCase().includes(debouncedSearch.toLowerCase())
+      )
+    : members;
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -65,8 +77,12 @@ const Members = () => {
            <div className="relative group flex-grow lg:flex-grow-0">
               <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-sky-500 transition-colors" size={18} />
               <input 
-                type="text" 
-                placeholder="Search Members..." 
+                type="text"
+                id="member-search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by name, ID, or role..."
+                aria-label="Search squadron members"
                 className="w-full lg:w-[320px] bg-white border border-slate-200 rounded-[24px] py-4 pl-14 pr-8 text-sm font-bold text-slate-950 shadow-sm focus:shadow-xl focus:border-sky-200 transition-all outline-none placeholder:text-slate-300"
               />
            </div>
@@ -80,7 +96,7 @@ const Members = () => {
         variants={containerVariants}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
       >
-        {members.map((member) => (
+        {filteredMembers.length > 0 ? filteredMembers.map((member) => (
           <motion.div key={member.id} variants={itemVariants}>
             <GlassPanel className="group p-0 overflow-hidden flex flex-col h-full !bg-white/80 border-slate-200 shadow-xl hover:shadow-2xl transition-all duration-700">
               {/* Visual Identity Header */}
@@ -133,7 +149,18 @@ const Members = () => {
                </footer>
             </GlassPanel>
           </motion.div>
-        ))}
+        )) : (
+          <motion.div
+            variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
+            className="col-span-full flex flex-col items-center justify-center py-24 space-y-4 text-center"
+            role="status"
+            aria-live="polite"
+          >
+            <Search size={40} className="text-slate-200" aria-hidden="true" />
+            <p className="text-xl font-black text-slate-950 tracking-tight">No members found</p>
+            <p className="text-sm text-slate-400">Try a different name, ID, or role.</p>
+          </motion.div>
+        )}
       </motion.div>
       <TechnicalDivider />
     </motion.div>

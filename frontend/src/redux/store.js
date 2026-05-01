@@ -5,6 +5,7 @@ import eventReducer from './slices/eventSlice';
 import userReducer from './slices/userSlice';
 import notificationReducer from './slices/notificationSlice';
 import chatReducer from './slices/chatSlice';
+import pollReducer from './slices/pollSlice';
 
 export const store = configureStore({
   reducer: {
@@ -14,5 +15,6 @@ export const store = configureStore({
     user: userReducer,
     notification: notificationReducer,
     chat: chatReducer,
+    poll: pollReducer,
   },
 });

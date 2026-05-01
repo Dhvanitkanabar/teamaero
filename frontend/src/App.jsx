@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { rehydratePolls } from './redux/slices/pollSlice';
+import { rehydrateTeams } from './redux/slices/leaderboardSlice';
 import { addNotification } from './redux/slices/notificationSlice';
 import Login from './pages/Login';
 import Landing from './pages/Landing';
@@ -9,6 +10,7 @@ import Dashboard from './pages/Dashboard';
 import Members from './pages/Members';
 import Chat from './pages/Chat';
 import Polls from './pages/Polls';
+import Leaderboard from './pages/Leaderboard';
 import AdminControl from './pages/AdminControl';
 import { AeroSky } from './components/AeroSky';
 import Layout from './components/Layout';
@@ -30,6 +32,15 @@ function App() {
           icon: 'Radio'
         }));
       }
+      if (event.data.type === 'TEAMS_UPDATED') {
+        dispatch(rehydrateTeams());
+        dispatch(addNotification({
+          title: 'Rankings Updated',
+          message: 'The Vanguard team scores and MVP have just been updated!',
+          type: 'ranking',
+          icon: 'Trophy'
+        }));
+      }
     };
   }, [dispatch]);
 
@@ -45,6 +56,7 @@ function App() {
           <Route path="/members" element={<Members />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/polls" element={<Polls />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/admin/control" element={<AdminControl />} />
         </Route>
 

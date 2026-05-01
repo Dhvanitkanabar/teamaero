@@ -13,6 +13,7 @@ import Chat from './pages/Chat';
 import Polls from './pages/Polls';
 import Leaderboard from './pages/Leaderboard';
 import Calendar from './pages/Calendar';
+import Profile from './pages/Profile';
 import AdminControl from './pages/AdminControl';
 import { AeroSky } from './components/AeroSky';
 import Layout from './components/Layout';
@@ -69,6 +70,7 @@ function App() {
           <Route path="/polls" element={<Polls />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/calendar" element={<Calendar />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/admin/control" element={<AdminControl />} />
         </Route>
 

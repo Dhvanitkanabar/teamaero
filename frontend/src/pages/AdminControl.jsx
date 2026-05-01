@@ -511,6 +511,28 @@ const AdminControl = () => {
                                />
                             </div>
                          </div>
+                         
+                         <div className="mt-6 space-y-4">
+                            {p.options.map((opt, i) => (
+                               <div key={i} className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                  <div className="flex justify-between items-center mb-2">
+                                     <p className="text-sm font-bold text-slate-900">{opt.label}</p>
+                                     <p className="text-[10px] font-black text-sky-600 uppercase tracking-widest">{opt.votes} Votes</p>
+                                  </div>
+                                  {opt.voters && opt.voters.length > 0 ? (
+                                     <div className="flex flex-wrap gap-2 mt-3">
+                                        {opt.voters.map((voter, idx) => (
+                                           <span key={idx} className="px-2 py-1 bg-white border border-slate-200 rounded-lg text-[9px] font-bold text-slate-500 uppercase tracking-widest shadow-sm flex items-center gap-1.5">
+                                              <User size={10} className="text-sky-500" /> {voter}
+                                           </span>
+                                        ))}
+                                     </div>
+                                  ) : (
+                                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-2">No votes yet</p>
+                                  )}
+                               </div>
+                            ))}
+                         </div>
                       </GlassPanel>
                    ))}
                 </div>

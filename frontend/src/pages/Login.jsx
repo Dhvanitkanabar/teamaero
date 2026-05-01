@@ -43,9 +43,10 @@ const Login = () => {
   const handleLogin = (e) => {
     if (e) e.preventDefault();
     const idNum = parseInt(userId);
-    const isValidId = idNum >= 108600 && idNum <= 108630;
+    const isMemberId = idNum >= 108600 && idNum <= 108630;
+    const isAdminId = idNum === 108600 || idNum === 108650;
     
-    if (isValidId && password === '123456') {
+    if ((isMemberId || isAdminId) && password === '123456') {
       if (rememberMe) {
         localStorage.setItem('vanguard_userId', userId);
         localStorage.setItem('vanguard_password', password);
@@ -53,8 +54,17 @@ const Login = () => {
         localStorage.removeItem('vanguard_userId');
         localStorage.removeItem('vanguard_password');
       }
-      dispatch(setUser({ name: `Operator_${idNum}`, role: 'member', id: userId }));
-      navigate('/dashboard');
+      
+      const role = isAdminId ? 'admin' : 'member';
+      dispatch(setUser({ name: isAdminId ? `Admin_${idNum}` : `Operator_${idNum}`, role, id: userId }));
+      
+      if (idNum === 108600) {
+        navigate('/admin/dashboard-1');
+      } else if (idNum === 108650) {
+        navigate('/admin/dashboard-2');
+      } else {
+        navigate('/dashboard');
+      }
     } else {
       setError('AUTH_ERROR: SIGNAL_REJECTED');
       setTimeout(() => setError(''), 3000);

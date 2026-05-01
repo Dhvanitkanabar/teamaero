@@ -143,14 +143,18 @@ const Polls = () => {
                                return (
                                  <button 
                                    key={option.id}
+                                   disabled={!poll.active}
                                    onClick={(e) => {
                                       e.stopPropagation();
-                                      dispatch(votePoll({ pollId: poll.id, optionId: option.id, userName: user?.name }));
+                                      if (poll.active) {
+                                        dispatch(votePoll({ pollId: poll.id, optionId: option.id, userName: user?.name }));
+                                      }
                                    }}
                                    className={`relative p-8 rounded-[28px] border-2 transition-all duration-700 text-left overflow-hidden group/opt
+                                      ${!poll.active ? 'opacity-80 cursor-not-allowed' : 'cursor-pointer'}
                                       ${isVoted 
                                          ? 'bg-sky-600 border-sky-600 text-white shadow-lg' 
-                                         : 'bg-slate-50 border-slate-100 text-slate-600 hover:border-sky-200 hover:bg-white hover:text-sky-600'}`}
+                                         : 'bg-slate-50 border-slate-100 text-slate-600 ' + (poll.active ? 'hover:border-sky-200 hover:bg-white hover:text-sky-600' : '')}`}
                                  >
                                     <div className="relative z-10 flex items-center justify-between">
                                        <div className="flex items-center gap-6">

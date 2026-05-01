@@ -15,6 +15,8 @@ import Leaderboard from './pages/Leaderboard';
 import Calendar from './pages/Calendar';
 import Profile from './pages/Profile';
 import AdminControl from './pages/AdminControl';
+import AdminDashboardOne from './pages/admin/AdminDashboardOne';
+import AdminDashboardTwo from './pages/admin/AdminDashboardTwo';
 import { AeroSky } from './components/AeroSky';
 import Layout from './components/Layout';
 import { ProtectedRoute } from './components/AuthGuard';
@@ -72,6 +74,8 @@ function App() {
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/admin/control" element={<AdminControl />} />
+          <Route path="/admin/dashboard-1" element={<AdminDashboardOne />} />
+          <Route path="/admin/dashboard-2" element={<AdminDashboardTwo />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

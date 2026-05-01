@@ -10,11 +10,13 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import SEO from '../components/SEO';
 import useAuth from '../hooks/useAuth';
+import useToast from '../hooks/useToast';
 import { useSelector as useReduxSelector } from 'react-redux';
 
 const Profile = () => {
   const { user, logout: logoutUser } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
   const { members } = useSelector((state) => state.user);
   const [activeTab, setActiveTab] = useState('overview');
   const [notificationsOn, setNotificationsOn] = useState(true);
@@ -42,7 +44,10 @@ const Profile = () => {
 
   if (!user) return null;
 
-  const handleLogout = () => logoutUser();
+  const handleLogout = () => {
+    toast.info('Signed Out', 'You have been signed out successfully.');
+    setTimeout(() => logoutUser(), 600);
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },

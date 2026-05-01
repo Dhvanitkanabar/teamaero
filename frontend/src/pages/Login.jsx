@@ -6,6 +6,7 @@ import { Shield, Lock, Mail, ArrowRight, UserCircle, Globe, Activity, Zap, Cpu, 
 import { motion, AnimatePresence } from 'framer-motion';
 import { AeroButton, GlassPanel, AeroCard } from '../components/AeroUI';
 import SEO from '../components/SEO';
+import { addNotification } from '../redux/slices/notificationSlice';
 
 const Login = () => {
   const [step, setStep] = useState(1);
@@ -57,7 +58,13 @@ const Login = () => {
       }
       
       const role = isAdminId ? 'admin' : 'member';
-      dispatch(setUser({ name: isAdminId ? `Admin_${idNum}` : `Operator_${idNum}`, role, id: userId }));
+      const name = isAdminId ? `Admin_${idNum}` : `Operator_${idNum}`;
+      dispatch(setUser({ name, role, id: userId }));
+      dispatch(addNotification({
+        type: 'success',
+        title: 'Signed In',
+        message: `Welcome back, ${name}!`,
+      }));
       
       if (idNum === 108600) {
         navigate('/admin/dashboard-1');
@@ -67,8 +74,13 @@ const Login = () => {
         navigate('/dashboard');
       }
     } else {
-      setError('AUTH_ERROR: SIGNAL_REJECTED');
-      setTimeout(() => setError(''), 3000);
+      setError('Invalid credentials. Please check your ID and password.');
+      dispatch(addNotification({
+        type: 'error',
+        title: 'Sign In Failed',
+        message: 'Invalid ID or password. Please try again.',
+      }));
+      setTimeout(() => setError(''), 3500);
     }
   };
 

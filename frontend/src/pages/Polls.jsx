@@ -11,6 +11,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { AeroCard, AeroButton, GlassPanel, TechnicalDivider } from '../components/AeroUI';
 import SEO from '../components/SEO';
+import useToast from '../hooks/useToast';
 
 const Polls = () => {
   const dispatch = useDispatch();
@@ -20,6 +21,7 @@ const Polls = () => {
   const user = authState.user;
 
   const [selectedPoll, setSelectedPoll] = useState(null);
+  const toast = useToast();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -161,7 +163,15 @@ const Polls = () => {
                                    onClick={(e) => {
                                       e.stopPropagation();
                                       if (poll.active) {
-                                        dispatch(votePoll({ pollId: poll.id, optionId: option.id, userName: user?.name }));
+                                        const alreadyVoted = option.voters?.includes(user?.name);
+                                        if (alreadyVoted) {
+                                          toast.warning('Already Voted', `You already picked "${option.label}" in this poll.`);
+                                        } else {
+                                          dispatch(votePoll({ pollId: poll.id, optionId: option.id, userName: user?.name }));
+                                          toast.success('Vote Recorded!', `You voted for "${option.label}".`);
+                                        }
+                                      } else {
+                                        toast.warning('Poll Closed', 'This poll is no longer accepting votes.');
                                       }
                                    }}
                                    className={`relative p-8 rounded-[28px] border-2 transition-all duration-700 text-left overflow-hidden group/opt

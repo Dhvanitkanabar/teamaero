@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { AeroButton } from '../components/AeroUI';
 import socket from '../services/socket';
 import SEO from '../components/SEO';
+import useToast from '../hooks/useToast';
 
 const Chat = () => {
   const dispatch = useDispatch();
@@ -23,6 +24,7 @@ const Chat = () => {
   const [inputText, setInputText] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [attachedFile, setAttachedFile] = useState(null);
+  const toast = useToast();
 
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -69,6 +71,11 @@ const Chat = () => {
     dispatch(addMessage(newMessage));
     socket.emit('sendMessage', newMessage);
 
+    // Toast only for file sends — avoid spamming on every text message
+    if (fileData) {
+      toast.success('File Shared', `"${fileData.name}" sent to the forum.`);
+    }
+
     setInputText('');
     setAttachedFile(null);
     setShowEmojiPicker(false);
@@ -86,7 +93,10 @@ const Chat = () => {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file) setAttachedFile(file);
+    if (file) {
+      setAttachedFile(file);
+      toast.info('File Ready', `"${file.name}" attached. Press send to share.`);
+    }
   };
 
   const addEmoji = (emoji) => setInputText(prev => prev + emoji);

@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import PageTransition from './PageTransition';
 import Navbar from './Navbar';
 import CallModal from './CallModal';
+import ToastContainer from './ToastContainer';
 import socket from '../services/socket';
 
 const Layout = ({ showNavbar = true }) => {
@@ -43,6 +44,9 @@ const Layout = ({ showNavbar = true }) => {
       >
         Skip to main content
       </a>
+
+      {/* Global toast system — always mounted */}
+      <ToastContainer />
 
       {/* Global call modal — always mounted so rings work on every page */}
       <CallModal socket={socket} user={user} />

@@ -3,7 +3,7 @@ import {
   Users, Search, ShieldCheck, Star, Award, 
   Filter, ArrowRight, Activity, 
   Target, Cpu, Terminal, Shield, ExternalLink
-} from 'lucide-center';
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { AeroCard, AeroButton, GlassPanel, TechnicalDivider } from '../components/AeroUI';

@@ -42,10 +42,22 @@ const Chat = () => {
   // Listen for chat messages from other users
   // (Registration is handled globally by Layout.jsx)
   useEffect(() => {
-    socket.on('receiveMessage', (messageData) => {
+    const handleReceiveMessage = (messageData) => {
       dispatch(addMessage(messageData));
+    };
+
+    socket.on('receiveMessage', handleReceiveMessage);
+
+    // Re-register listener if socket reconnects
+    socket.on('connect', () => {
+      socket.off('receiveMessage', handleReceiveMessage);
+      socket.on('receiveMessage', handleReceiveMessage);
     });
-    return () => { socket.off('receiveMessage'); };
+
+    return () => {
+      socket.off('receiveMessage', handleReceiveMessage);
+      socket.off('connect');
+    };
   }, [dispatch]);
 
   const handleSendMessage = (e) => {

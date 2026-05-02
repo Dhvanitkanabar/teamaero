@@ -2,20 +2,11 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const chatChannel = new BroadcastChannel('vanguard_chat');
 
-// Helper to get storage key for the current user
-const getStorageKey = () => {
-  try {
-    const auth = JSON.parse(localStorage.getItem('vanguard_auth'));
-    const userId = auth?.user?.id || 'guest';
-    return `vanguard_messages_${userId}`;
-  } catch {
-    return 'vanguard_messages_guest';
-  }
-};
+const SHARED_KEY = 'vanguard_messages_shared';
 
 const loadMessages = () => {
   try {
-    return JSON.parse(localStorage.getItem(getStorageKey())) || [];
+    return JSON.parse(localStorage.getItem(SHARED_KEY)) || [];
   } catch {
     return [];
   }
@@ -30,15 +21,19 @@ const chatSlice = createSlice({
   initialState,
   reducers: {
     addMessage: (state, action) => {
-      state.messages.push(action.payload);
-      localStorage.setItem(getStorageKey(), JSON.stringify(state.messages));
-      chatChannel.postMessage({ type: 'NEW_MESSAGE', payload: action.payload });
+      // Prevent duplicate messages
+      const exists = state.messages.find(m => m.id === action.payload.id);
+      if (!exists) {
+        state.messages.push(action.payload);
+        localStorage.setItem(SHARED_KEY, JSON.stringify(state.messages));
+        chatChannel.postMessage({ type: 'NEW_MESSAGE', payload: action.payload });
+      }
     },
     syncMessages: (state, action) => {
       const exists = state.messages.find(m => m.id === action.payload.id);
       if (!exists) {
         state.messages.push(action.payload);
-        localStorage.setItem(getStorageKey(), JSON.stringify(state.messages));
+        localStorage.setItem(SHARED_KEY, JSON.stringify(state.messages));
       }
     },
     rehydrateChat: (state) => {
@@ -46,9 +41,7 @@ const chatSlice = createSlice({
     },
     clearMessages: (state) => {
       state.messages = [];
-      localStorage.setItem(getStorageKey(), JSON.stringify([]));
-      // WE DO NOT BROADCAST CHAT_CLEARED ANYMORE
-      // This ensures the action is local to the current user's dashboard only.
+      localStorage.setItem(SHARED_KEY, JSON.stringify([]));
     }
   }
 });

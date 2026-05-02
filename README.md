@@ -45,6 +45,32 @@ AERO provides a centralized, **Identity-First** portal that serves as the "sourc
 
 ---
 
+## 🛡️ Access & Authentication Protocol
+
+The AERO portal is secured via a dual-layer identity verification system.
+
+### How to Log In
+1.  **Identity Entry**: Enter your authorized **GR Number** (e.g., `123456`) on the cinematic login portal.
+2.  **Verification**: Input your secure password assigned during squadron enlistment.
+3.  **Authentication**: The system validates your credentials against the neural database and redirects you to your personalized **Squadron Dashboard**.
+
+*Note: For the best experience, ensure you have enabled your "Identity First" profile picture in the Identity Vault.*
+
+---
+
+## ⚡ Administrative Command Center (Admin Dashboard)
+
+Operators with **Admin Privileges** gain access to the Command Center—a high-level orchestration layer designed to manage the entire squadron's trajectory.
+
+### Key Administrative Capabilities:
+*   **📡 Global Event Broadcasting**: Create and schedule mandatory squadron events. These appear instantly on every operator's calendar and trigger real-time notifications.
+*   **🗳️ Poll Orchestration**: Design and launch squadron-wide votes. Admins can set end-times, vote weights, and view detailed analytical breakdowns of results.
+*   **🏆 Performance Management**: Manually inject or override performance metrics to ensure the Leaderboard accurately reflects real-world contributions.
+*   **👥 Member Roster Control**: Authorized admins can update member roles, adjust clearance levels, and manage the 30-student identity mapping.
+*   **📢 System-Wide Alerts**: Broadcast emergency "Red Alerts" or "Maintenance Notices" that appear as persistent banners for all active users.
+
+---
+
 ## 🧠 Technical Architecture
 
 ### Tech Stack

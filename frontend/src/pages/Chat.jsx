@@ -16,6 +16,8 @@ import FileUploadZone from '../components/FileUploadZone';
 import LiveIndicator from '../components/LiveIndicator';
 import analytics from '../services/analytics';
 
+import { USER_MAP } from '../utils/userMapping';
+
 const Chat = () => {
   const dispatch = useDispatch();
   const chatState = useSelector((state) => state.chat) || {};
@@ -222,11 +224,16 @@ const Chat = () => {
                     <div className={`max-w-[85%] lg:max-w-[70%] flex gap-3 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
                       {!isSameSender ? (
                         <div className={`w-9 h-9 rounded-xl p-0.5 shadow-lg flex-shrink-0 mt-0.5 overflow-hidden border-2 ${isOwn ? 'bg-slate-900 border-white/20' : 'bg-white border-slate-100'}`}>
-                          <img 
-                            src={msg.avatar || `https://api.dicebear.com/7.x/${msg.style || 'avataaars'}/svg?seed=${msg.seed || msg.sender}`} 
-                            className="w-full h-full object-cover" 
-                            alt="Avatar" 
-                          />
+                          {(() => {
+                            const senderData = Object.values(USER_MAP).find(u => u.name === msg.sender);
+                            return (
+                              <img 
+                                src={msg.avatar || senderData?.customImage || `https://api.dicebear.com/7.x/${msg.style || 'avataaars'}/svg?seed=${msg.seed || msg.sender}`} 
+                                className="w-full h-full object-cover" 
+                                alt="Avatar" 
+                              />
+                            );
+                          })()}
                         </div>
                       ) : (
                         <div className="w-9 flex-shrink-0" />

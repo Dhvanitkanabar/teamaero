@@ -2,8 +2,16 @@
  * User mapping for the Vanguard AERO platform.
  * Maps GR Numbers (108601 - 108630) to Student Names, Roles, and Bios.
  */
+import devanshiPhoto from '../assets/profiles/devanshi.png';
+
 export const USER_MAP = {
-  108601: { name: 'Devanshi', role: 'admin', bio: 'Expert in system architecture and strategic operations. Leading the squadron to peak efficiency.', status: 'Active' },
+  108601: { 
+    name: 'Devanshi', 
+    role: 'admin', 
+    bio: 'Expert in system architecture and strategic operations. Leading the squadron to peak efficiency.', 
+    status: 'Active',
+    customImage: devanshiPhoto
+  },
   108602: { name: 'Zeel', role: 'member', bio: 'Frontend engineer specializing in interactive 3D interfaces and kinetic motion design.', status: 'Active' },
   108603: { name: 'Jaydip', role: 'member', bio: 'Backend developer focused on real-time data sync and robust socket communication.', status: 'Active' },
   108604: { name: 'Saptak', role: 'member', bio: 'UI/UX specialist with a passion for glassmorphic design and user-centric workflows.', status: 'Active' },
@@ -52,6 +60,6 @@ export const getAllMembers = () => {
     ...data,
     xp: Math.floor(Math.random() * 5000) + 1000,
     integrity: 95 + Math.floor(Math.random() * 5),
-    image: `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.name}&backgroundColor=b6e3f4`,
+    image: data.customImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.name}&backgroundColor=b6e3f4`,
   }));
 };

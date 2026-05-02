@@ -150,7 +150,7 @@ const Profile = () => {
             <div className="relative shrink-0 group/avatar">
               <div className="w-28 h-28 md:w-36 md:h-36 rounded-[28px] md:rounded-[36px] overflow-hidden bg-slate-800 border-2 border-white/10 shadow-2xl relative">
                 <img
-                  src={profileImage || `https://api.dicebear.com/7.x/${avatarStyle}/svg?seed=${localStorage.getItem(`vanguard_seed_${displayUser.id}`) || displayUser.name}`}
+                  src={profileImage || displayUser.customImage || `https://api.dicebear.com/7.x/${avatarStyle}/svg?seed=${localStorage.getItem(`vanguard_seed_${displayUser.id}`) || displayUser.name}`}
                   alt={`${displayUser.name}'s avatar`}
                   className="w-full h-full object-cover"
                 />

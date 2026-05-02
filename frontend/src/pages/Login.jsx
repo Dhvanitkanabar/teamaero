@@ -1,197 +1,182 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { local, LOCAL_KEYS } from '../utils/storage';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { setUser } from '../redux/slices/authSlice';
-import { Shield, Lock, Mail, ArrowRight, UserCircle, Globe, Activity, Zap, Cpu, Terminal, Key, Fingerprint } from 'lucide-react';
+import { Shield, Lock, Mail, ArrowRight, UserCircle, Globe, Activity, Zap, Cpu, Terminal, Key, Fingerprint, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AeroButton, GlassPanel, AeroCard } from '../components/AeroUI';
 import SEO from '../components/SEO';
 import { addNotification } from '../redux/slices/notificationSlice';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 
 const Login = () => {
-  const [step, setStep] = useState(1);
-  const [userId, setUserId] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [rememberMe, setRememberMe] = useState(false);
   const { isAuthenticated } = useSelector((state) => state.auth);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  // Validation Schema using Yup (Point 5)
+  const validationSchema = Yup.object({
+    userId: Yup.string()
+      .matches(/^[0-9]+$/, 'Operator ID must be numeric')
+      .min(6, 'Operator ID must be 6 digits')
+      .max(6, 'Operator ID must be 6 digits')
+      .required('Operator ID is required'),
+    password: Yup.string()
+      .min(6, 'Access key must be at least 6 characters')
+      .required('Access key is required'),
+  });
+
+  const formik = useFormik({
+    initialValues: {
+      userId: local.get(LOCAL_KEYS.REMEMBERED_USER_ID) || '',
+      password: '',
+    },
+    validationSchema,
+    onSubmit: (values, { setSubmitting, setFieldError }) => {
+      const idNum = parseInt(values.userId);
+      const isMemberId = idNum >= 108600 && idNum <= 108630;
+      const isAdminId = idNum === 108600 || idNum === 108650;
+      
+      // Artificial delay for premium UX
+      setTimeout(() => {
+        if ((isMemberId || isAdminId) && values.password === '123456') {
+          if (rememberMe) {
+            local.set(LOCAL_KEYS.REMEMBERED_USER_ID, values.userId);
+          } else {
+            local.remove(LOCAL_KEYS.REMEMBERED_USER_ID);
+          }
+          
+          const role = isAdminId ? 'admin' : 'member';
+          const name = isAdminId ? `Admin_${idNum}` : `Operator_${idNum}`;
+          dispatch(setUser({ name, role, id: values.userId }));
+          dispatch(addNotification({
+            type: 'success',
+            title: 'Access Granted',
+            message: `Welcome back, ${name}. Identity verified.`,
+          }));
+          
+          if (idNum === 108600) navigate('/admin/dashboard-1');
+          else if (idNum === 108650) navigate('/admin/dashboard-2');
+          else navigate('/dashboard');
+        } else {
+          setFieldError('password', 'Authentication failed. Check credentials.');
+          dispatch(addNotification({
+            type: 'error',
+            title: 'Access Denied',
+            message: 'Invalid Operator ID or Access Key.',
+          }));
+        }
+        setSubmitting(false);
+      }, 1000);
+    },
+  });
 
   useEffect(() => {
-    // Only userId is persisted — passwords are NEVER stored in any storage.
     const savedId = local.get(LOCAL_KEYS.REMEMBERED_USER_ID);
-    if (savedId) {
-      setUserId(savedId);
-      setRememberMe(true);
-    }
+    if (savedId) setRememberMe(true);
   }, []);
 
   if (isAuthenticated) return <Navigate to="/dashboard" />;
-
-  const handleForgotPassword = (e) => {
-    if (e) e.preventDefault();
-    setError('enter you bd in this format DD/MM/YYYY');
-    setTimeout(() => setError(''), 5000);
-  };
-
-  const handleRegisterClick = (e) => {
-    if (e) e.preventDefault();
-    setError('YOU ARE ALREADY REGISTERED TRY YOUR GR NUM AND BIRTHDATE');
-    setTimeout(() => setError(''), 5000);
-  };
-
-  const handleLogin = (e) => {
-    if (e) e.preventDefault();
-    const idNum = parseInt(userId);
-    const isMemberId = idNum >= 108600 && idNum <= 108630;
-    const isAdminId = idNum === 108600 || idNum === 108650;
-    
-    if ((isMemberId || isAdminId) && password === '123456') {
-      // Persist only the userId — NEVER the password.
-      if (rememberMe) {
-        local.set(LOCAL_KEYS.REMEMBERED_USER_ID, userId);
-      } else {
-        local.remove(LOCAL_KEYS.REMEMBERED_USER_ID);
-      }
-      
-      const role = isAdminId ? 'admin' : 'member';
-      const name = isAdminId ? `Admin_${idNum}` : `Operator_${idNum}`;
-      dispatch(setUser({ name, role, id: userId }));
-      dispatch(addNotification({
-        type: 'success',
-        title: 'Signed In',
-        message: `Welcome back, ${name}!`,
-      }));
-      
-      if (idNum === 108600) {
-        navigate('/admin/dashboard-1');
-      } else if (idNum === 108650) {
-        navigate('/admin/dashboard-2');
-      } else {
-        navigate('/dashboard');
-      }
-    } else {
-      setError('Invalid credentials. Please check your ID and password.');
-      dispatch(addNotification({
-        type: 'error',
-        title: 'Sign In Failed',
-        message: 'Invalid ID or password. Please try again.',
-      }));
-      setTimeout(() => setError(''), 3500);
-    }
-  };
 
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden p-6">
       <SEO
         title="Login"
-        description="Sign in to Vanguard AERO — your squadron operations command center. Enter your operator credentials to access the platform."
+        description="Secure operator login for the Vanguard AERO platform."
         url="/login"
         noindex={true}
-        schema={{
-          '@context': 'https://schema.org',
-          '@type': 'WebPage',
-          name: 'Login — Vanguard AERO',
-          description: 'Secure operator login for the Vanguard AERO platform.',
-          url: 'https://vanguard-aero.vercel.app/login',
-        }}
       />
       <motion.div 
-        initial={{ opacity: 0, scale: 0.9 }}
+        initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
         className="relative z-10 w-full max-w-[480px]"
       >
-        <div className="vanguard-glass-dark backdrop-blur-[60px] !bg-black/20 border-white/10 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] flex flex-col items-center p-12 rounded-[40px]">
+        <div className="vanguard-glass-dark backdrop-blur-[60px] !bg-black/40 border-white/10 shadow-2xl flex flex-col items-center p-12 rounded-[40px]">
           
-          {/* Header */}
           <header className="mb-12 text-center">
-            <h2 className="text-5xl font-black text-white tracking-tight mb-2">Login</h2>
+            <div className="w-16 h-16 bg-white/10 rounded-[20px] flex items-center justify-center mx-auto mb-6 border border-white/20">
+              <Shield className="text-white" size={32} />
+            </div>
+            <h2 className="text-4xl font-black text-white tracking-tight mb-2 uppercase italic">Aero Command</h2>
+            <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.4em]">Identity Verification Required</p>
           </header>
 
-          <form onSubmit={handleLogin} className="w-full space-y-6">
-            {/* Username Field */}
-            <div className="space-y-2">
+          <form onSubmit={formik.handleSubmit} className="w-full space-y-6">
+            <div className="space-y-1">
               <div className="relative group">
                 <input 
+                  id="userId"
+                  name="userId"
                   type="text" 
-                  placeholder="Username"
-                  value={userId}
-                  onChange={(e) => setUserId(e.target.value)}
-                  className="w-full bg-white/10 border border-white/20 rounded-full py-[18px] px-8 text-white placeholder:text-white/40 focus:border-white/60 focus:bg-white/15 transition-all outline-none text-lg"
+                  placeholder="Operator ID (e.g. 108601)"
+                  {...formik.getFieldProps('userId')}
+                  className={`w-full bg-white/5 border ${formik.touched.userId && formik.errors.userId ? 'border-rose-500/50' : 'border-white/10'} rounded-2xl py-[18px] px-8 text-white placeholder:text-white/20 focus:border-white/40 focus:bg-white/10 transition-all outline-none text-base`}
                 />
-                <UserCircle className="absolute right-6 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-white transition-colors" size={24}/>
+                <UserCircle className="absolute right-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-white/60 transition-colors" size={20}/>
               </div>
+              {formik.touched.userId && formik.errors.userId && (
+                <p className="text-[10px] text-rose-400 font-bold uppercase tracking-wider pl-4 pt-1">{formik.errors.userId}</p>
+              )}
             </div>
 
-            {/* Password Field */}
-            <div className="space-y-2">
+            <div className="space-y-1">
               <div className="relative group">
                 <input 
+                  id="password"
+                  name="password"
                   type="password" 
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-white/10 border border-white/20 rounded-full py-[18px] px-8 text-white placeholder:text-white/40 focus:border-white/60 focus:bg-white/15 transition-all outline-none text-lg"
+                  placeholder="Access Key"
+                  {...formik.getFieldProps('password')}
+                  className={`w-full bg-white/5 border ${formik.touched.password && formik.errors.password ? 'border-rose-500/50' : 'border-white/10'} rounded-2xl py-[18px] px-8 text-white placeholder:text-white/20 focus:border-white/40 focus:bg-white/10 transition-all outline-none text-base`}
                 />
-                <Lock className="absolute right-6 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-white transition-colors" size={24}/>
+                <Lock className="absolute right-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-white/60 transition-colors" size={20}/>
               </div>
+              {formik.touched.password && formik.errors.password && (
+                <p className="text-[10px] text-rose-400 font-bold uppercase tracking-wider pl-4 pt-1">{formik.errors.password}</p>
+              )}
             </div>
 
-            {/* Remember & Forgot */}
             <div className="flex items-center justify-between px-2">
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <div className="w-4 h-4 rounded-sm border border-white/30 flex items-center justify-center group-hover:border-white/60 transition-colors">
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <div className={`w-5 h-5 rounded-lg border ${rememberMe ? 'bg-white border-white' : 'border-white/20'} flex items-center justify-center transition-all`}>
                   <input 
                     type="checkbox" 
-                    className="sr-only peer" 
+                    className="sr-only" 
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
                   />
-                  <div className={`w-2 h-2 bg-white rounded-px transition-transform ${rememberMe ? 'scale-100' : 'scale-0'}`} />
+                  {rememberMe && <Zap size={12} className="text-slate-950 fill-slate-950" />}
                 </div>
-                <span className="text-[13px] font-medium text-white/80 group-hover:text-white">Remember Me</span>
+                <span className="text-[12px] font-bold text-white/60 uppercase tracking-widest">Remember Me</span>
               </label>
-              <Link 
-                to="#" 
-                onClick={handleForgotPassword}
-                className="text-[13px] font-medium text-white/60 hover:text-white transition-colors"
+              <button 
+                type="button"
+                className="text-[12px] font-bold text-white/40 uppercase tracking-widest hover:text-white transition-colors"
+                onClick={() => dispatch(addNotification({ type: 'info', title: 'Hint', message: 'Use your 6-digit ID and default key: 123456' }))}
               >
-                Forgot password?
-              </Link>
+                Need Help?
+              </button>
             </div>
 
-            {error && (
-              <motion.div 
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-rose-400 text-[11px] font-bold uppercase tracking-widest text-center"
-              >
-                 {error}
-              </motion.div>
-            )}
-
-            {/* Login Button */}
             <button 
               type="submit"
-              className="w-full bg-white text-slate-950 rounded-full py-[14px] text-xl font-bold hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_20px_40px_rgba(255,255,255,0.1)] mt-4"
+              disabled={formik.isSubmitting}
+              className="w-full bg-white text-slate-950 rounded-2xl py-[16px] text-sm font-black uppercase tracking-[0.2em] hover:bg-sky-50 transition-all shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              Login
+              {formik.isSubmitting ? (
+                <Loader2 className="animate-spin mr-2" size={18} />
+              ) : (
+                <>Authorize Access <ArrowRight className="ml-2" size={16} /></>
+              )}
             </button>
-
-            {/* Footer */}
-            <footer className="pt-8 text-center">
-              <p className="text-sm font-medium text-white/60">
-                Don't have an account? <Link to="#" onClick={handleRegisterClick} className="text-white font-bold hover:underline ml-1">Register</Link>
-              </p>
-            </footer>
           </form>
         </div>
       </motion.div>
     </div>
-
   );
 };
 

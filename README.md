@@ -1,141 +1,148 @@
-# 🚀 AERO – Vanguard Game Platform
+# 🚀 Vanguard AERO — Squadron Operations Command Center
 
-AERO is a modern, interactive platform designed to manage team-based activities within a Vanguard. It helps teams coordinate weekly games, make decisions through voting, track performance, and maintain a structured workflow in a fun and engaging way.
-
-## 🎯 Problem Statement
-
-In our batch, 120 students are divided into 4 Vanguards, each with 30 members. Every week, one Vanguard organizes a game.
-
-Previously, coordination was done using WhatsApp, which led to:
-- ❌ Unstructured discussions
-- ❌ Messages getting lost
-- ❌ No clear decision-making process
-- ❌ No record of past games
-- ❌ No performance tracking
-
-## 💡 Solution
-
-AERO solves this by providing a centralized platform where all activities are managed in a structured flow:
-**Discuss → Vote → Schedule → Play → Track**
+Vanguard AERO is a high-fidelity, interactive management platform engineered to orchestrate team-based activities within a decentralized squadron environment. It transitions unstructured community communication into a high-density, automated workflow: **Discuss → Vote → Schedule → Play → Track**.
 
 ---
 
-## ✨ Key Features
+## 🎯 Project Overview
 
-### 💬 Real-Time Chat
-- Group chat for all members
-- Instant communication
-- Organized discussion
+### The Problem
+In large-scale batch environments (e.g., 120+ students divided into squads), coordination via traditional messaging apps leads to:
+- **Entropy**: Important decisions are lost in chat history.
+- **Opacity**: No clear record of past performance or MVP status.
+- **Inertia**: Scheduling weekly operations manually is time-consuming and prone to error.
 
-### 🗳️ Poll System
-- Create polls to decide games
-- Members vote
-- Highest voted game is selected
-
-### 📅 Event & Game Scheduling
-- Weekly game scheduling (Wednesday)
-- Manual event editing
-- Organized calendar view
-
-### 👥 Game Check-In
-- Track who played and who didn’t
-- Works like attendance system
-- Used for performance tracking
-
-### 📊 Game History
-- Stores all past games
-- Shows: Game name, Date, Scores, Winner
-
-### 🏆 Leaderboard
-- Tracks performance of members
-- Points based on: Participation, Wins, Achievements
-
-### 🌟 Wall of Fame
-- Highlights top performers
-- Displays MVPs
-- Encourages competition
-
-### 🔔 Notifications
-- Real-time updates
-- Alerts for: New polls, Messages, Events
-
-### 🛡️ Admin Panel
-- Separate admin access
-- Manage: Polls, Events, Results, Members
+### The AERO Solution
+AERO provides a centralized, **Identity-First** portal that serves as the "source of truth" for the squadron. It leverages real-time synchronization, 3D atmospheric immersion, and role-based permissions to ensure every operation is executed with precision.
 
 ---
 
-## 🎨 UI / UX Highlights
-- Clean and modern light-blue theme
-- Floating navbar
-- Smooth animations and transitions
-- Scroll-based effects
-- Premium interactive design
+## 🧠 Technical Architecture
+
+### Tech Stack
+| Tier | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Frontend** | React 19 (Vite) | High-performance UI rendering |
+| **State** | Redux Toolkit | Centralized state management & persistence |
+| **3D Engine** | Three.js / R3F | Immersive "AeroSky" atmospheric background |
+| **Real-time** | Socket.IO | Bi-directional event synchronization |
+| **Styling** | Tailwind CSS 4.0 | Utility-first, high-density design system |
+| **Animations** | Framer Motion | Cinematic transitions and micro-interactions |
+| **Backend** | Node.js (Express) | RESTful API & Signaling server |
+| **Database** | MongoDB | Persistent storage for users, polls, and results |
 
 ---
 
-## 🧠 Tech Stack
+## 📂 Granular Folder Architecture
 
-### Frontend
-- **Framework**: React (Vite)
-- **Styling**: Tailwind CSS
-- **State**: Redux Toolkit
-- **Routing**: React Router
-- **Animations**: Framer Motion
-- **Scrolling**: Lenis
-- **3D**: React Three Fiber / Spline
-- **API**: Axios & Socket.IO Client
-
-### Backend (Planned)
-- **Runtime**: Node.js
-- **Framework**: Express.js
-- **Database**: MongoDB & Mongoose
-- **Real-time**: Socket.IO
-- **Security**: JWT Authentication
-
----
-
-## 🔁 System Architecture
-```
-Frontend (React)
-        ↓
-API & Socket Requests
-        ↓
-Backend (Node.js + Express)
-        ↓
-Database (MongoDB)
+### 🖥️ Client Architecture (`/frontend`)
+```bash
+src/
+├── assets/          # Brand identity, icons, and 3D models
+├── components/      # Atomic UI components
+│   ├── AeroUI.jsx   # Design System (GlassPanel, AeroButton, etc.)
+│   ├── Layout.jsx   # Protected layout wrapper with Sidebar/Navbar
+│   └── SEO.jsx      # Dynamic meta-tag management for search/social
+├── hooks/           # Business logic abstractions
+│   ├── useAuth.js   # Identity & Role management
+│   ├── useStorage.js# Type-safe Local/Session storage handlers
+│   └── useSocket.js # WebSocket lifecycle management
+├── pages/           # High-level views and route components
+│   ├── Dashboard.jsx# Operational overview and metrics
+│   ├── Polls.jsx    # Democratic decision-making hub
+│   └── Calendar.jsx # Squadron milestone scheduling
+├── redux/           # Global state slices and store config
+├── services/        # API clients and WebSocket definitions
+└── utils/           # Helper functions, constants, and mock data
 ```
 
-## 📁 Project Structure
-- `frontend/` → UI & Client-side logic
-- `backend/` → Server & API logic
+### ⚙️ Server Architecture (`/backend`)
+```bash
+src/
+├── config/          # DB connection & Environment validation
+├── controllers/     # Orchestration logic for API endpoints
+├── middleware/      # JWT verification, logging, and error handling
+├── models/          # Data schemas (Users, Polls, GameHistory)
+├── routes/          # Express route definitions
+└── index.js         # Entry point & Socket.IO server initialization
+```
 
 ---
 
-## 🚧 Current Status
-- ✅ Login page is implemented
-- ✅ UI design is completed in Figma
-- ✅ Basic frontend setup is ready
+## 🚀 Installation & Setup
 
-## 🔮 Future Enhancements
-- 🔹 Full frontend development (Dashboard, Chat, Polls, etc.)
-- 🔹 Backend API development using Node.js and Express
-- 🔹 Database integration with MongoDB
-- 🔹 Real-time features using Socket.IO
-- 🔹 Game scheduling and calendar system
-- 🔹 Leaderboard and performance tracking system
-- 🔹 Admin panel functionality
-- 🔹 Push notifications
-- 🔹 Mobile app (React Native)
+### Prerequisites
+- **Node.js**: v18.x or higher
+- **Package Manager**: npm v9.x+ (preferred)
+- **Environment**: Access to a MongoDB instance (Local or Atlas)
+
+### 1. Repository Initialization
+```bash
+git clone https://github.com/Dhvanitkanabar/teamaero.git
+cd teamaero
+```
+
+### 2. Frontend Configuration
+```bash
+cd frontend
+npm install
+# Ensure .env contains:
+# VITE_API_URL=http://localhost:5000/api
+# VITE_SOCKET_URL=http://localhost:5000
+npm run dev
+```
+
+### 3. Backend Configuration
+```bash
+cd ../backend
+npm install
+# Create a .env file:
+# PORT=5000
+# MONGO_URI=your_mongodb_connection_string
+# JWT_SECRET=your_secure_random_string
+npm start
+```
 
 ---
 
-## 🎯 Final Vision
-AERO aims to become a complete team management and activity coordination platform that is: **Structured, Interactive, Performance-driven, and Visually engaging.**
+## ✨ Featured Systems
 
-**👨‍💻 Developed For**: Vanguard team-based game coordination and activity management.
+### 🛡️ Smart Storage Utility
+AERO uses a custom-built, fallback-aware storage engine located in `src/utils/storage.js`. 
+- **Persistent**: `localStorage` stores theme preferences and non-sensitive operator metadata.
+- **Ephemeral**: `sessionStorage` manages multi-step form progress and temporary search filters.
+- **Security**: Sensitive data (passwords) are strictly excluded from storage; tokens are cleared instantly on session termination.
+
+### 🗳️ Squadron Operations Hub
+- **Dynamic Polls**: Real-time voting with instant result broadcasting.
+- **Automated Scheduling**: The system automatically flags "Wednesday" as a combat day but allows Admin overrides.
+- **Leaderboard**: Weighted ranking system based on Participation (40%), Performance (40%), and Achievements (20%).
+
+### 🎨 High-Density UI/UX
+- **AeroSky**: A 3D atmospheric simulation that reacts to user navigation.
+- **Glassmorphism**: Deep blur effects with metallic borders for a "technical aviation" aesthetic.
+- **Smooth Navigation**: Integration of `Lenis` for momentum-based scrolling.
 
 ---
 
-## 🧾 Summary
-AERO transforms unstructured communication into a well-organized system that improves teamwork, decision-making, and engagement.
+## 🛠️ Development & Quality Standards
+
+To maintain the project's high code quality, utilize the following built-in tools:
+
+- **Linting**: Run `npm run lint` to check for style violations.
+- **Auto-Fix**: Run `npm run lint:fix` to automatically resolve lint errors.
+- **Formatting**: Run `npm run format` to standardize the codebase using Prettier.
+
+---
+
+## 🎯 Roadmap
+- [x] High-fidelity Identity Portal (Login)
+- [x] Storage & Code Quality Infrastructure
+- [ ] Real-time Chat Workspace Integration
+- [ ] Automated MVP calculation engine
+- [ ] Mobile PWA optimization
+
+---
+
+**👨‍💻 Developed By**: Vanguard Development Team
+**📍 Project Scope**: Squadron Coordination & Activity Management Platform

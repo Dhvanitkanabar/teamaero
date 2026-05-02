@@ -74,3 +74,13 @@ export const TechnicalDivider = () => (
     <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent via-sky-500 to-transparent" />
   </div>
 );
+
+/**
+ * Skeleton — premium pulsing placeholder for loading states (Point 6).
+ */
+export const Skeleton = ({ className = "", circle = false }) => (
+  <div 
+    className={`bg-slate-200/50 animate-pulse ${circle ? 'rounded-full' : 'rounded-2xl'} ${className}`} 
+  />
+);
+

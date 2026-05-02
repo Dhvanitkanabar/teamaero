@@ -13,6 +13,9 @@ import { AeroCard, AeroButton, GlassPanel, TechnicalDivider } from '../component
 import SEO from '../components/SEO';
 import useToast from '../hooks/useToast';
 import analytics from '../services/analytics';
+import socket from '../services/socket';
+import { setPolls } from '../redux/slices/pollSlice';
+import { useEffect } from 'react';
 
 const Polls = () => {
   const dispatch = useDispatch();
@@ -23,6 +26,21 @@ const Polls = () => {
 
   const [selectedPoll, setSelectedPoll] = useState(null);
   const toast = useToast();
+
+  useEffect(() => {
+    socket.on('polls_state', (data) => {
+      dispatch(setPolls(data));
+    });
+
+    socket.on('polls_update', (data) => {
+      dispatch(setPolls(data));
+    });
+
+    return () => {
+      socket.off('polls_state');
+      socket.off('polls_update');
+    };
+  }, [dispatch]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -168,6 +186,9 @@ const Polls = () => {
                                         if (alreadyVoted) {
                                           toast.warning('Already Voted', `You already picked "${option.label}" in this poll.`);
                                         } else {
+                                          // Emit to backend for global sync
+                                          socket.emit('vote_poll', { pollId: poll.id, optionId: option.id, userName: user?.name });
+                                          // Also dispatch locally for instant feedback
                                           dispatch(votePoll({ pollId: poll.id, optionId: option.id, userName: user?.name }));
                                           toast.success('Vote Recorded!', `You voted for "${option.label}".`);
                                         }

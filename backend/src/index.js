@@ -21,6 +21,21 @@ const io = new Server(server, {
 const connectedUsers = {};
 // Global message history buffer (last 100 messages)
 const messageHistory = [];
+// Active polls buffer
+let activePolls = [
+  {
+    id: 1,
+    question: "Select the Next Operational Objective",
+    options: [
+      { id: 1, label: "Deep Sea Exploration", votes: 0, voters: [] },
+      { id: 2, label: "Orbital Satellite Repair", votes: 0, voters: [] },
+      { id: 3, label: "Arctic Research Outpost", votes: 0, voters: [] }
+    ],
+    totalVotes: 0,
+    active: true,
+    createdAt: new Date().toISOString()
+  }
+];
 
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
@@ -30,6 +45,46 @@ io.on('connection', (socket) => {
 
   socket.on('get_history', () => {
     socket.emit('message_history', messageHistory);
+  });
+
+  // --- Polls ---
+  socket.emit('polls_state', activePolls);
+
+  socket.on('vote_poll', ({ pollId, optionId, userName }) => {
+    const poll = activePolls.find(p => p.id === pollId);
+    if (poll && poll.active) {
+      // Remove previous vote from this user in this poll
+      poll.options.forEach(opt => {
+        if (opt.voters) {
+          opt.voters = opt.voters.filter(v => v !== userName);
+          opt.votes = opt.voters.length;
+        }
+      });
+
+      const option = poll.options.find(o => o.id === optionId);
+      if (option) {
+        if (!option.voters) option.voters = [];
+        if (!option.voters.includes(userName)) {
+          option.voters.push(userName);
+          option.votes = option.voters.length;
+        }
+      }
+      poll.totalVotes = poll.options.reduce((sum, opt) => sum + (opt.voters?.length || 0), 0);
+      io.emit('polls_update', activePolls);
+    }
+  });
+
+  socket.on('create_poll', (pollData) => {
+    const newPoll = {
+      id: Date.now(),
+      ...pollData,
+      totalVotes: 0,
+      active: true,
+      createdAt: new Date().toISOString()
+    };
+    activePolls.unshift(newPoll);
+    if (activePolls.length > 20) activePolls.pop();
+    io.emit('polls_update', activePolls);
   });
 
   // --- User Registration ---

@@ -64,9 +64,13 @@ const pollSlice = createSlice({
     },
     rehydratePolls: (state) => {
       state.polls = loadPolls();
+    },
+    setPolls: (state, action) => {
+      state.polls = action.payload;
+      localStorage.setItem('vanguard_polls', JSON.stringify(state.polls));
     }
   },
 });
 
-export const { addPoll, votePoll, togglePollStatus, rehydratePolls } = pollSlice.actions;
+export const { addPoll, votePoll, togglePollStatus, rehydratePolls, setPolls } = pollSlice.actions;
 export default pollSlice.reducer;

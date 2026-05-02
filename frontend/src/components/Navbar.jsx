@@ -185,7 +185,7 @@ const UserActions = ({ isAuthenticated, user, isMobile }) => {
       <Link to="/profile" className="relative group">
         <div className={`${isMobile ? 'w-12 h-12' : 'w-10 h-10'} rounded-[14px] bg-slate-950 flex items-center justify-center text-white border border-white/20 group-hover:border-sky-500/50 transition-all duration-500 overflow-hidden shadow-2xl`}>
            <img 
-             src={userAvatar || displayUser?.customImage || `https://api.dicebear.com/7.x/${userStyle}/svg?seed=${localStorage.getItem(`vanguard_seed_${user?.id}`) || user?.name}`} 
+             src={displayUser?.customImage || userAvatar || `https://api.dicebear.com/7.x/${userStyle}/svg?seed=${localStorage.getItem(`vanguard_seed_${user?.id}`) || user?.name}`} 
              className="w-full h-full relative z-10 object-cover" 
              alt="Avatar" 
            />
@@ -261,7 +261,7 @@ const Navbar = () => {
                   
                   <Link to="/profile" className="w-8 h-8 rounded-full overflow-hidden border border-white/10">
                     <img 
-                      src={localStorage.getItem(`vanguard_avatar_${user?.id}`) || displayUser?.customImage || `https://api.dicebear.com/7.x/${localStorage.getItem(`vanguard_style_${user?.id}`) || 'avataaars'}/svg?seed=${localStorage.getItem(`vanguard_seed_${user?.id}`) || user?.name}`} 
+                      src={displayUser?.customImage || localStorage.getItem(`vanguard_avatar_${user?.id}`) || `https://api.dicebear.com/7.x/${localStorage.getItem(`vanguard_style_${user?.id}`) || 'avataaars'}/svg?seed=${localStorage.getItem(`vanguard_seed_${user?.id}`) || user?.name}`} 
                       className="w-full h-full object-cover" 
                       alt="User" 
                     />

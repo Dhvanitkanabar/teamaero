@@ -228,7 +228,7 @@ const Chat = () => {
                             const senderData = Object.values(USER_MAP).find(u => u.name === msg.sender);
                             return (
                               <img 
-                                src={msg.avatar || senderData?.customImage || `https://api.dicebear.com/7.x/${msg.style || 'avataaars'}/svg?seed=${msg.seed || msg.sender}`} 
+                                src={senderData?.customImage || msg.avatar || `https://api.dicebear.com/7.x/${msg.style || 'avataaars'}/svg?seed=${msg.seed || msg.sender}`} 
                                 className="w-full h-full object-cover" 
                                 alt="Avatar" 
                               />

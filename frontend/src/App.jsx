@@ -48,6 +48,11 @@ function AppRoutes() {
         TEAMS_UPDATED: 'Trophy',
         EVENTS_UPDATED: 'Calendar',
       };
+      const paths = {
+        POLLS_UPDATED: '/polls',
+        TEAMS_UPDATED: '/leaderboard',
+        EVENTS_UPDATED: '/calendar',
+      };
       const actions = {
         POLLS_UPDATED: rehydratePolls,
         TEAMS_UPDATED: rehydrateTeams,
@@ -61,6 +66,7 @@ function AppRoutes() {
           message: messages[event.data.type],
           type: event.data.type.toLowerCase().split('_')[0],
           icon: icons[event.data.type],
+          path: paths[event.data.type], // Added direct path navigation
         }));
       }
     };
@@ -80,7 +86,7 @@ function AppRoutes() {
           <Route path="/polls" element={<Polls />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/calendar" element={<Calendar />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/:userId?" element={<Profile />} />
           <Route path="/game-history" element={<GameHistory />} />
           <Route path="/wall-of-fame" element={<WallOfFame />} />
           <Route path="/admin/control" element={<AdminControl />} />

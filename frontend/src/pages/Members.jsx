@@ -1,37 +1,39 @@
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState, useMemo } from 'react';
 import { 
   Users, Search, ShieldCheck, Star, Award, 
-  Filter, ExternalLink, Mail, ArrowRight, Activity, 
-  Target, Cpu, Terminal
+  Filter, ArrowRight, Activity, 
+  Target, Cpu, Terminal, Shield, ExternalLink
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { AeroCard, AeroButton, GlassPanel, TechnicalDivider } from '../components/AeroUI';
 import SEO from '../components/SEO';
 import useDebounce from '../hooks/useDebounce';
+import { getAllMembers } from '../utils/userMapping';
 
 const Members = () => {
-  const { members } = useSelector((state) => state.user);
+  const navigate = useNavigate();
+  const allMembers = useMemo(() => getAllMembers(), []);
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearch = useDebounce(searchTerm, 350);
 
   // Filter members based on debounced search term
   const filteredMembers = debouncedSearch.trim()
-    ? members.filter((m) =>
+    ? allMembers.filter((m) =>
         m.name?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         m.accountId?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         m.role?.toLowerCase().includes(debouncedSearch.toLowerCase())
       )
-    : members;
+    : allMembers;
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+    visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
   };
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { duration: 0.8, ease: "easeOut" } }
+    visible: { y: 0, opacity: 1, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } }
   };
 
   return (
@@ -43,124 +45,93 @@ const Members = () => {
     >
       <SEO
         title="Members"
-        description="Browse all Vanguard AERO squadron members. View profiles, scores, and status of every operator in the community."
+        description="Browse the full Vanguard AERO squadron roster. Meet the 30 operators driving innovation."
         url="/members"
-        schema={{
-          '@context': 'https://schema.org',
-          '@type': 'ItemList',
-          name: 'Vanguard AERO Squadron Members',
-          description: 'Full roster of Vanguard AERO operators and community members.',
-          url: 'https://vanguard-aero.vercel.app/members',
-          itemListElement: members.slice(0, 10).map((m, i) => ({
-            '@type': 'ListItem',
-            position: i + 1,
-            name: m.name,
-          })),
-        }}
       />
-      {/* Community Directory Header */}
 
-      <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 border-b border-slate-200 pb-12">
+      <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 border-b border-white/10 pb-12">
         <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-sky-50 text-sky-600 rounded-full text-[9px] font-bold uppercase tracking-widest border border-sky-100">
-               <Users size={12}/> Community Network
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 text-sky-400 rounded-full text-[9px] font-black uppercase tracking-[0.3em] border border-white/10">
+               <Users size={10}/> Squadron Roster
             </div>
-            <h1 className="text-4xl lg:text-7xl font-black text-slate-950 tracking-tight leading-none">
-              Member<span className="text-sky-600">NETWORK</span>
+            <h1 className="text-5xl lg:text-8xl font-black text-white tracking-tighter leading-none italic uppercase">
+              Member<span className="text-sky-500">Net</span>
             </h1>
-            <p className="text-slate-500 text-lg lg:text-xl font-medium opacity-80 border-l-2 border-sky-500 pl-6 max-w-2xl">
-              Meet the community leaders and members driving innovation across our community.
+            <p className="text-white/40 text-lg lg:text-xl font-medium border-l-2 border-sky-500 pl-6 max-w-2xl italic">
+              30 Elite Operators authorized for Vanguard AERO deployment.
             </p>
         </div>
         
         <div className="flex items-center gap-4 w-full lg:w-auto">
            <div className="relative group flex-grow lg:flex-grow-0">
-              <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-sky-500 transition-colors" size={18} />
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-sky-500 transition-colors" size={18} />
               <input 
                 type="text"
-                id="member-search"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search by name, ID, or role..."
-                aria-label="Search squadron members"
-                className="w-full lg:w-[320px] bg-white border border-slate-200 rounded-[24px] py-4 pl-14 pr-8 text-sm font-bold text-slate-950 shadow-sm focus:shadow-xl focus:border-sky-200 transition-all outline-none placeholder:text-slate-300"
+                placeholder="Search Identity..."
+                className="w-full lg:w-[320px] bg-white/5 border border-white/10 rounded-[24px] py-5 pl-14 pr-8 text-sm font-bold text-white shadow-2xl focus:border-sky-500/50 transition-all outline-none placeholder:text-white/20"
               />
            </div>
-           <AeroButton variant="secondary" className="w-14 h-14 !p-0 !rounded-2xl !bg-white shadow-lg border-slate-200 shrink-0">
-              <Filter size={20} className="text-slate-400" />
-           </AeroButton>
         </div>
       </header>
 
       <motion.div 
         variants={containerVariants}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
       >
-        {filteredMembers.length > 0 ? filteredMembers.map((member) => (
+        {filteredMembers.map((member) => (
           <motion.div key={member.id} variants={itemVariants}>
-            <GlassPanel className="group p-0 overflow-hidden flex flex-col h-full !bg-white/80 border-slate-200 shadow-xl hover:shadow-2xl transition-all duration-700">
-              {/* Visual Identity Header */}
-              <div className="h-24 bg-gradient-to-br from-slate-50 to-sky-50/50 relative flex items-center px-6 border-b border-slate-100">
-                 <div className="absolute top-0 right-0 w-24 h-24 bg-sky-500/5 rounded-full blur-[40px]" />
-                 <span className="text-[10px] font-bold text-slate-400 tracking-widest uppercase opacity-60">{member.role}</span>
-                 <div className="ml-auto flex gap-1">
-                    <div className="w-1 h-1 rounded-full bg-sky-400" />
-                    <div className="w-1 h-1 rounded-full bg-sky-200" />
-                 </div>
+            <div className="vanguard-glass-dark group p-0 overflow-hidden flex flex-col h-full border-white/5 hover:border-sky-500/30 transition-all duration-500 rounded-[28px]">
+              {/* Card Header - Smaller Height */}
+              <div className="h-16 bg-white/5 relative flex items-center px-6 border-b border-white/5">
+                 <div className="absolute top-0 right-0 w-20 h-20 bg-sky-500/10 rounded-full blur-[30px] opacity-0 group-hover:opacity-100 transition-opacity" />
+                 <span className={`text-[9px] font-black uppercase tracking-[0.3em] ${member.role === 'admin' ? 'text-amber-400' : 'text-sky-400'}`}>
+                    {member.role === 'admin' ? 'Strategic Admin' : 'Squadron Member'}
+                 </span>
               </div>
 
-               <div className="p-8 flex flex-col items-center text-center -mt-16 flex-grow">
-                  <div className="relative mb-6">
-                     <div className="w-28 h-28 rounded-3xl bg-white p-1 shadow-2xl group-hover:scale-105 group-hover:-rotate-2 transition-all duration-700 border border-slate-100">
-                        <img src={member.image} alt={member.name} className="w-full h-full object-cover rounded-[22px]" />
+               <div className="p-6 flex flex-col items-center text-center -mt-12 flex-grow">
+                  <div className="relative mb-4">
+                     <div className="w-20 h-20 rounded-[24px] bg-slate-900 p-1 shadow-2xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-700 border border-white/10 overflow-hidden">
+                        <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
                      </div>
-                     <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-4 border-white ${member.status === 'Active' ? 'bg-emerald-500 shadow-lg' : 'bg-slate-300'}`} />
+                     <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-slate-950 bg-emerald-500" />
                   </div>
                   
-                  <div className="space-y-1 mb-6">
-                     <h3 className="font-black text-xl text-slate-950 tracking-tight group-hover:text-sky-600 transition-colors duration-500">{member.name}</h3>
-                     <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">{member.accountId}</p>
+                  <div className="space-y-0.5 mb-4">
+                     <h3 className="font-black text-xl text-white tracking-tight italic uppercase">{member.name}</h3>
+                     <p className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20">{member.accountId}</p>
                   </div>
-  
-                  <div className="w-full grid grid-cols-2 gap-4 mb-6">
-                     <div className="text-left p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1.5">Contribution</p>
-                        <p className="text-sm font-black text-slate-950 tracking-tight">{member.integrity}%</p>
-                     </div>
-                     <div className="text-left p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1.5">Points</p>
-                        <p className="text-sm font-black text-slate-950 tracking-tight">{member.xp.toLocaleString()}</p>
-                     </div>
-                  </div>
-  
-                  <p className="text-xs text-slate-500 font-medium leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity duration-500 flex-grow">
-                    {member.bio}
+
+                  <p className="text-[10px] text-white/50 font-bold leading-relaxed tracking-wide flex-grow uppercase italic line-clamp-2">
+                    "{member.bio}"
                   </p>
+
+                  <div className="w-full grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-white/5">
+                     <div className="text-left">
+                        <p className="text-[7px] font-black text-white/20 uppercase tracking-widest leading-none">Integrity</p>
+                        <p className="text-xs font-black text-white">{member.integrity}%</p>
+                     </div>
+                     <div className="text-right">
+                        <p className="text-[7px] font-black text-white/20 uppercase tracking-widest leading-none">XP</p>
+                        <p className="text-xs font-black text-sky-400">{member.xp}</p>
+                     </div>
+                  </div>
                </div>
                
-               <footer className="p-6 bg-slate-50/50 flex flex-col gap-3 mt-auto border-t border-slate-100">
-                  <div className="flex justify-between items-center text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                     <span className="flex items-center gap-2"><Activity size={10} className="text-emerald-500"/> Availability</span>
-                     <span className="text-sky-600">Online Now</span>
-                  </div>
-                  <AeroButton variant="secondary" className="w-full !py-3 !text-white !bg-sky-600 !rounded-2xl !border-none !text-[9px] !font-black !uppercase !tracking-widest group/btn transition-all active:scale-95 shadow-lg shadow-sky-600/20">
-                     View Profile <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform duration-500 ml-2" />
+               <footer className="p-4 bg-white/5 flex flex-col gap-3 mt-auto border-t border-white/5">
+                  <AeroButton 
+                    variant="secondary" 
+                    onClick={() => navigate(`/profile/${member.id}`)}
+                    className="w-full !py-3 !text-white !bg-white/5 !rounded-xl !border-white/10 !text-[9px] !font-black !uppercase !tracking-[0.2em] group/btn hover:!bg-white hover:!text-slate-950 transition-all"
+                  >
+                     Visit Profile <ExternalLink size={12} className="ml-2" />
                   </AeroButton>
                </footer>
-            </GlassPanel>
+            </div>
           </motion.div>
-        )) : (
-          <motion.div
-            variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
-            className="col-span-full flex flex-col items-center justify-center py-24 space-y-4 text-center"
-            role="status"
-            aria-live="polite"
-          >
-            <Search size={40} className="text-slate-200" aria-hidden="true" />
-            <p className="text-xl font-black text-slate-950 tracking-tight">No members found</p>
-            <p className="text-sm text-slate-400">Try a different name, ID, or role.</p>
-          </motion.div>
-        )}
+        ))}
       </motion.div>
       <TechnicalDivider />
     </motion.div>

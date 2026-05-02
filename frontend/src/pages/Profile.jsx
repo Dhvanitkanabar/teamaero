@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useParams } from 'react-router-dom';
 import {
   User, Mail, Shield, LogOut, Settings, Award, Activity,
   Zap, Key, ChevronRight, Bell, Lock, Eye, EyeOff,
@@ -11,38 +11,38 @@ import { motion, AnimatePresence } from 'framer-motion';
 import SEO from '../components/SEO';
 import useAuth from '../hooks/useAuth';
 import useToast from '../hooks/useToast';
-import { useSelector as useReduxSelector } from 'react-redux';
+import { getUserByGR, getAllMembers } from '../utils/userMapping';
 
 const Profile = () => {
-  const { user, logout: logoutUser } = useAuth();
+  const { userId } = useParams();
+  const { user: currentUser, logout: logoutUser } = useAuth();
   const navigate = useNavigate();
   const toast = useToast();
-  const { members } = useSelector((state) => state.user);
+  
   const [activeTab, setActiveTab] = useState('overview');
   const [notificationsOn, setNotificationsOn] = useState(true);
   const [privacyOn, setPrivacyOn] = useState(false);
   const [syncOn, setSyncOn] = useState(true);
 
-  // Find this user's member data for richer stats
-  const memberData = useMemo(() => {
-    if (!user || !members.length) return null;
-    return members.find(
-      (m) =>
-        m.name === user.name ||
-        m.accountId === user.accountId ||
-        m.id === user.id
-    ) || members[0];
-  }, [user, members]);
+  // Determine which user data to display (dynamic vs current)
+  const displayUser = useMemo(() => {
+    if (userId) {
+      const data = getUserByGR(userId);
+      if (data) return { ...data, id: userId, accountId: `GR-${userId}` };
+    }
+    return currentUser;
+  }, [userId, currentUser]);
 
-  const accountId = useMemo(() => {
-    if (!user) return '';
-    const hash = user.name
-      .split('')
-      .reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return `VGD-${hash.toString(36).toUpperCase()}`;
-  }, [user]);
+  const isOwnProfile = !userId || userId === currentUser?.id;
 
-  if (!user) return null;
+  const accountId = displayUser?.accountId || '';
+  const joinDate = 'January 2026';
+
+  if (!displayUser) return (
+    <div className="min-h-screen flex items-center justify-center text-white">
+      <p className="text-2xl font-black italic uppercase">Identity Not Found</p>
+    </div>
+  );
 
   const handleLogout = () => {
     toast.info('Signed Out', 'You have been signed out successfully.');
@@ -58,10 +58,9 @@ const Profile = () => {
     visible: { y: 0, opacity: 1, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
   };
 
-  const tabs = ['overview', 'activity', 'settings'];
-  const score = memberData?.score || memberData?.xp || 0;
-  const integrity = memberData?.integrity || 98;
-  const joinDate = 'January 2026';
+  const tabs = isOwnProfile ? ['overview', 'activity', 'settings'] : ['overview', 'activity'];
+  const score = displayUser?.xp || 0;
+  const integrity = displayUser?.integrity || 98;
 
   return (
     <motion.div
@@ -71,20 +70,20 @@ const Profile = () => {
       className="max-w-6xl mx-auto pb-32 pt-8 px-0 space-y-8"
     >
       <SEO
-        title={`${user.name}`}
-        description={`${user.name}'s Vanguard AERO profile — stats, activity, and account settings.`}
+        title={`${displayUser.name}`}
+        description={`${displayUser.name}'s Vanguard AERO profile — stats, activity, and account settings.`}
         url="/profile"
         noindex={true}
         schema={{
           '@context': 'https://schema.org',
           '@type': 'ProfilePage',
-          name: `${user.name} — Vanguard AERO`,
+          name: `${displayUser.name} — Vanguard AERO`,
           url: 'https://vanguard-aero.vercel.app/profile',
           mainEntity: {
             '@type': 'Person',
-            name: user.name,
+            name: displayUser.name,
             identifier: accountId,
-            jobTitle: user.role === 'admin' ? 'Administrator' : 'Squadron Member',
+            jobTitle: displayUser.role === 'admin' ? 'Administrator' : 'Squadron Member',
           },
         }}
       />
@@ -106,8 +105,8 @@ const Profile = () => {
             <div className="relative shrink-0">
               <div className="w-28 h-28 md:w-36 md:h-36 rounded-[28px] md:rounded-[36px] overflow-hidden bg-slate-800 border-2 border-white/10 shadow-2xl">
                 <img
-                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`}
-                  alt={`${user.name}'s avatar`}
+                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${displayUser.name}`}
+                  alt={`${displayUser.name}'s avatar`}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -121,9 +120,9 @@ const Profile = () => {
                 <div className="flex items-center gap-3 flex-wrap">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/15 border border-sky-500/25 text-sky-400 text-[10px] font-black uppercase tracking-[0.25em]">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    {user.role === 'admin' ? 'Administrator' : 'Squadron Member'}
+                    {displayUser.role === 'admin' ? 'Administrator' : 'Squadron Member'}
                   </span>
-                  {user.role === 'admin' && (
+                  {displayUser.role === 'admin' && (
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/25 text-amber-400 text-[10px] font-black uppercase tracking-[0.25em]">
                       <Shield size={10} />
                       Admin Access
@@ -131,7 +130,7 @@ const Profile = () => {
                   )}
                 </div>
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-none">
-                  {user.name}
+                  {displayUser.name}
                 </h1>
                 <p className="text-slate-400 text-sm font-medium tracking-wide">
                   {accountId} · Joined {joinDate}
@@ -143,7 +142,7 @@ const Profile = () => {
                 {[
                   { label: 'Points', value: score.toLocaleString(), icon: Zap, color: 'text-sky-400' },
                   { label: 'Attendance', value: `${integrity}%`, icon: CheckCircle, color: 'text-emerald-400' },
-                  { label: 'Rank', value: '#' + (members.findIndex(m => m.name === user.name) + 1 || 1), icon: Trophy, color: 'text-amber-400' },
+                  { label: 'Rank', value: '#' + (getAllMembers().findIndex(m => m.name === displayUser.name) + 1 || 1), icon: Trophy, color: 'text-amber-400' },
                 ].map((stat) => (
                   <div key={stat.label} className="flex items-center gap-2">
                     <stat.icon size={14} className={stat.color} aria-hidden="true" />
@@ -155,14 +154,16 @@ const Profile = () => {
             </div>
 
             {/* Sign out button */}
-            <button
-              onClick={handleLogout}
-              aria-label="Sign out of your account"
-              className="shrink-0 flex items-center gap-3 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-white hover:bg-rose-500/20 hover:border-rose-500/30 hover:text-rose-400 transition-all duration-300 active:scale-95 text-sm font-bold"
-            >
-              <LogOut size={16} aria-hidden="true" />
-              Sign Out
-            </button>
+            {isOwnProfile && (
+              <button
+                onClick={handleLogout}
+                aria-label="Sign out of your account"
+                className="shrink-0 flex items-center gap-3 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-white hover:bg-rose-500/20 hover:border-rose-500/30 hover:text-rose-400 transition-all duration-300 active:scale-95 text-sm font-bold"
+              >
+                <LogOut size={16} aria-hidden="true" />
+                Sign Out
+              </button>
+            )}
           </div>
         </div>
 
@@ -220,9 +221,9 @@ const Profile = () => {
                 </header>
                 <div className="p-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {[
-                    { label: 'Full Name', value: user.name, icon: User },
+                    { label: 'Full Name', value: displayUser.name, icon: User },
                     { label: 'Account ID', value: accountId, icon: Key },
-                    { label: 'Role', value: user.role === 'admin' ? 'Administrator' : 'Squadron Member', icon: Shield },
+                    { label: 'Role', value: displayUser.role === 'admin' ? 'Administrator' : 'Squadron Member', icon: Shield },
                     { label: 'Status', value: 'Active', icon: Activity },
                     { label: 'Member Since', value: joinDate, icon: Calendar },
                     { label: 'Region', value: 'Global', icon: Globe },

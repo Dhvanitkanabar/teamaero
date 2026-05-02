@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getAuthToken, removeAuthToken } from '../utils/storage';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -9,10 +10,10 @@ const api = axios.create({
   },
 });
 
-// Request Interceptor for Auth
+// Request Interceptor — attach Bearer token from localStorage utility
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = getAuthToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -21,14 +22,13 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor for Error Handling
+// Response Interceptor — handle 401 Unauthorized
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Handle unauthorized (redirect to login)
-      localStorage.removeItem('token');
-      // window.location.href = '/login';
+      // Remove the invalid token; the AuthGuard / useAuth will redirect to /login
+      removeAuthToken();
     }
     return Promise.reject(error);
   }

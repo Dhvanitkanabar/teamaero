@@ -1,0 +1,10 @@
+# Build artefacts
+dist/
+build/
+
+# Dependencies
+node_modules/
+
+# Generated / cache
+.vite/
+coverage/

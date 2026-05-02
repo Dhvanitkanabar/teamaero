@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { local, LOCAL_KEYS } from '../utils/storage';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { setUser } from '../redux/slices/authSlice';
@@ -19,11 +20,10 @@ const Login = () => {
   const { isAuthenticated } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    const savedId = localStorage.getItem('vanguard_userId');
-    const savedPass = localStorage.getItem('vanguard_password');
-    if (savedId && savedPass) {
+    // Only userId is persisted — passwords are NEVER stored in any storage.
+    const savedId = local.get(LOCAL_KEYS.REMEMBERED_USER_ID);
+    if (savedId) {
       setUserId(savedId);
-      setPassword(savedPass);
       setRememberMe(true);
     }
   }, []);
@@ -49,12 +49,11 @@ const Login = () => {
     const isAdminId = idNum === 108600 || idNum === 108650;
     
     if ((isMemberId || isAdminId) && password === '123456') {
+      // Persist only the userId — NEVER the password.
       if (rememberMe) {
-        localStorage.setItem('vanguard_userId', userId);
-        localStorage.setItem('vanguard_password', password);
+        local.set(LOCAL_KEYS.REMEMBERED_USER_ID, userId);
       } else {
-        localStorage.removeItem('vanguard_userId');
-        localStorage.removeItem('vanguard_password');
+        local.remove(LOCAL_KEYS.REMEMBERED_USER_ID);
       }
       
       const role = isAdminId ? 'admin' : 'member';

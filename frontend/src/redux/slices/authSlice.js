@@ -1,10 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { local, LOCAL_KEYS, clearAllStorageOnLogout } from '../../utils/storage';
 
-const initialState = { 
-  user: null, 
-  isAuthenticated: false, 
-  role: null, 
-  loading: false 
+const initialState = {
+  user: null,
+  isAuthenticated: false,
+  role: null,
+  loading: false,
 };
 
 const authSlice = createSlice({
@@ -15,19 +16,21 @@ const authSlice = createSlice({
       state.user = action.payload;
       state.isAuthenticated = !!action.payload;
       state.role = action.payload?.role || 'member';
-      // We still save to localStorage for sync purposes across tabs, 
-      // but we will NOT auto-load it on page refresh to satisfy user request for re-login
-      localStorage.setItem('vanguard_auth', JSON.stringify({
+      // Persist auth state for cross-tab sync via BroadcastChannel.
+      // We do NOT auto-rehydrate on page load (user must re-login).
+      // Passwords are NEVER stored here — only identity metadata.
+      local.set(LOCAL_KEYS.AUTH, {
         user: state.user,
         isAuthenticated: state.isAuthenticated,
-        role: state.role
-      }));
+        role: state.role,
+      });
     },
     logout: (state) => {
       state.user = null;
       state.isAuthenticated = false;
       state.role = null;
-      localStorage.removeItem('vanguard_auth');
+      // Wipe ALL namespaced data from localStorage + sessionStorage on logout.
+      clearAllStorageOnLogout();
     },
     setLoading: (state, action) => {
       state.loading = action.payload;

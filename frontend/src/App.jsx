@@ -26,9 +26,13 @@ import useAnalytics from './hooks/useAnalytics';
 
 const syncChannel = new BroadcastChannel('vanguard_sync');
 
-function App() {
+/**
+ * AppRoutes — rendered inside <Router> so that hooks that depend on
+ * React Router context (useLocation via useAnalytics) work correctly.
+ */
+function AppRoutes() {
   const dispatch = useDispatch();
-  useAnalytics(); // auto page-view tracking on every route change
+  useAnalytics(); // auto page-view tracking on every route change — needs <Router>
 
   useEffect(() => {
     syncChannel.onmessage = (event) => {
@@ -38,7 +42,7 @@ function App() {
           title: 'Polls Updated',
           message: 'Community polls have been updated. Cast your vote!',
           type: 'poll',
-          icon: 'Radio'
+          icon: 'Radio',
         }));
       }
       if (event.data.type === 'TEAMS_UPDATED') {
@@ -47,7 +51,7 @@ function App() {
           title: 'Rankings Updated',
           message: 'The Vanguard team scores and MVP have just been updated!',
           type: 'ranking',
-          icon: 'Trophy'
+          icon: 'Trophy',
         }));
       }
       if (event.data.type === 'EVENTS_UPDATED') {
@@ -56,19 +60,19 @@ function App() {
           title: 'Calendar Updated',
           message: 'New events have been added to the community calendar.',
           type: 'event',
-          icon: 'Calendar'
+          icon: 'Calendar',
         }));
       }
     };
   }, [dispatch]);
 
   return (
-    <Router>
+    <>
       <AeroSky />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
-        
+
         <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/members" element={<Members />} />
@@ -86,6 +90,18 @@ function App() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+    </>
+  );
+}
+
+/**
+ * App — top-level component. Only responsible for providing the Router
+ * wrapper; all route-aware logic lives inside AppRoutes.
+ */
+function App() {
+  return (
+    <Router>
+      <AppRoutes />
     </Router>
   );
 }

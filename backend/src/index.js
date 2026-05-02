@@ -19,9 +19,18 @@ const io = new Server(server, {
 
 // Track connected users: { socketId: { userId, userName } }
 const connectedUsers = {};
+// Global message history buffer (last 100 messages)
+const messageHistory = [];
 
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
+
+  // Send message history to the newly connected user
+  socket.emit('message_history', messageHistory);
+
+  socket.on('get_history', () => {
+    socket.emit('message_history', messageHistory);
+  });
 
   // --- User Registration ---
   // Each client registers themselves with their userId and name on connect
@@ -34,6 +43,10 @@ io.on('connection', (socket) => {
 
   // --- Chat ---
   socket.on('sendMessage', (messageData) => {
+    // Save to history
+    messageHistory.push(messageData);
+    if (messageHistory.length > 100) messageHistory.shift();
+    
     socket.broadcast.emit('receiveMessage', messageData);
   });
 

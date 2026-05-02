@@ -46,16 +46,26 @@ const Chat = () => {
       dispatch(addMessage(messageData));
     };
 
+    const handleMessageHistory = (history) => {
+      // Sync whole history at once
+      if (history && history.length > 0) {
+        history.forEach(msg => dispatch(syncMessages(msg)));
+      }
+    };
+
     socket.on('receiveMessage', handleReceiveMessage);
+    socket.on('message_history', handleMessageHistory);
 
     // Re-register listener if socket reconnects
     socket.on('connect', () => {
       socket.off('receiveMessage', handleReceiveMessage);
       socket.on('receiveMessage', handleReceiveMessage);
+      socket.emit('get_history'); // Request history on reconnect
     });
 
     return () => {
       socket.off('receiveMessage', handleReceiveMessage);
+      socket.off('message_history', handleMessageHistory);
       socket.off('connect');
     };
   }, [dispatch]);

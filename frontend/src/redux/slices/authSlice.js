@@ -1,10 +1,20 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { local, LOCAL_KEYS, clearAllStorageOnLogout } from '../../utils/storage';
 
+const getPersistedAuth = () => {
+  const persisted = local.get(LOCAL_KEYS.AUTH);
+  if (persisted && persisted.isAuthenticated) {
+    return persisted;
+  }
+  return {
+    user: null,
+    isAuthenticated: false,
+    role: null,
+  };
+};
+
 const initialState = {
-  user: null,
-  isAuthenticated: false,
-  role: null,
+  ...getPersistedAuth(),
   loading: false,
 };
 

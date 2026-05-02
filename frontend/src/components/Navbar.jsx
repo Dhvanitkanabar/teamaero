@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../redux/slices/authSlice';
 import { markAsRead, markAllAsRead, clearNotifications } from '../redux/slices/notificationSlice';
@@ -59,6 +59,16 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen, onClose]);
 
+  const navigate = useNavigate();
+
+  const handleNotificationClick = (n) => {
+    dispatch(markAsRead(n.id));
+    if (n.path) {
+      navigate(n.path);
+      onClose();
+    }
+  };
+
   const getIcon = (type) => {
     switch (type) {
       case 'poll': return <Radio size={16} className="text-sky-500" />;
@@ -98,7 +108,7 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
                 {notifications.map((n) => (
                   <div 
                     key={n.id} 
-                    onClick={() => dispatch(markAsRead(n.id))}
+                    onClick={() => handleNotificationClick(n)}
                     className={`p-5 flex gap-4 transition-colors cursor-pointer group relative ${!n.read ? 'bg-sky-50/50' : 'hover:bg-slate-50'}`}
                   >
                     {!n.read && <div className="absolute left-0 top-0 bottom-0 w-1 bg-sky-500" />}

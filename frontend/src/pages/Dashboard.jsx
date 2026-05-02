@@ -16,6 +16,8 @@ import { rehydrateEvents } from '../redux/slices/eventSlice';
 import { format } from 'date-fns';
 import SEO from '../components/SEO';
 
+import { USER_MAP } from '../utils/userMapping';
+
 const Dashboard = () => {
   const dispatch = useDispatch();
   const authState = useSelector((state) => state.auth) || {};
@@ -26,6 +28,10 @@ const Dashboard = () => {
   const user = authState.user;
   const members = userState.members || []; 
 
+  // Resolve Commander Data
+  const myTeam = teams.find(t => t.id === 'aero') || teams[0];
+  const commanderData = Object.values(USER_MAP).find(u => u.name === 'Devanshi' || u.name === myTeam?.leader);
+  const commanderPhoto = commanderData?.customImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${myTeam?.leader || 'Commander'}`;
   useEffect(() => {
     dispatch(rehydrateTeams());
     dispatch(rehydrateEvents());
@@ -135,7 +141,7 @@ const Dashboard = () => {
                <div className="relative group/avatar">
                   <div className="absolute -inset-4 bg-sky-500/30 blur-2xl rounded-full opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-700" />
                   <div className="relative w-28 h-28 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-[32px] md:rounded-[40px] bg-slate-900 p-1.5 border border-white/10 shadow-2xl overflow-hidden transform group-hover/avatar:scale-105 group-hover/avatar:-rotate-3 transition-all duration-700">
-                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Commander" className="w-full h-full rounded-[26px] md:rounded-[34px] bg-slate-800" alt="Commander" />
+                     <img src={commanderPhoto} className="w-full h-full rounded-[26px] md:rounded-[34px] bg-slate-800 object-cover" alt="Commander" />
                   </div>
                   <div className="absolute -bottom-3 md:-bottom-4 -right-3 md:-right-4 w-10 h-10 md:w-12 md:h-12 bg-sky-500 rounded-xl md:rounded-2xl flex items-center justify-center text-white border-2 border-slate-950 shadow-xl">
                      <Star size={18} className="fill-white" />

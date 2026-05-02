@@ -61,7 +61,6 @@ const Profile = () => {
   const tabs = isOwnProfile ? ['overview', 'activity', 'settings'] : ['overview', 'activity'];
   const score = displayUser?.xp || 0;
   const integrity = displayUser?.integrity || 98;
-  const joinDate = 'January 2026';
 
   return (
     <motion.div

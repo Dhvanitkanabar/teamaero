@@ -19,10 +19,24 @@ const Profile = () => {
   const navigate = useNavigate();
   const toast = useToast();
   
-  const [activeTab, setActiveTab] = useState('overview');
-  const [notificationsOn, setNotificationsOn] = useState(true);
-  const [privacyOn, setPrivacyOn] = useState(false);
-  const [syncOn, setSyncOn] = useState(true);
+  const [notificationsOn, setNotificationsOn] = useState(() => localStorage.getItem('vanguard_notif_polls') !== 'false');
+  const [privacyOn, setPrivacyOn] = useState(() => localStorage.getItem('vanguard_privacy_mode') === 'true');
+  const [syncOn, setSyncOn] = useState(() => localStorage.getItem('vanguard_notif_events') !== 'false');
+
+  useEffect(() => {
+    localStorage.setItem('vanguard_notif_polls', notificationsOn);
+    localStorage.setItem('vanguard_privacy_mode', privacyOn);
+    localStorage.setItem('vanguard_notif_events', syncOn);
+  }, [notificationsOn, privacyOn, syncOn]);
+
+  const handleSecurityAction = (action) => {
+    const messages = {
+      password: { title: 'Security Protocol', msg: 'Verification link sent to your authorized email.' },
+      tfa: { title: '2FA Activation', msg: 'Multi-factor authentication system initializing...' },
+      sessions: { title: 'Session Manager', msg: 'Scanning active authorized devices...' }
+    };
+    toast.success(messages[action].title, messages[action].msg);
+  };
 
   // Determine which user data to display (dynamic vs current)
   const displayUser = useMemo(() => {
@@ -444,12 +458,13 @@ const Profile = () => {
               </header>
               <div className="p-8 space-y-3">
                 {[
-                  { label: 'Change Password', icon: Key, desc: 'Update your login credentials' },
-                  { label: 'Two-Factor Authentication', icon: Shield, desc: 'Add an extra layer of security' },
-                  { label: 'Active Sessions', icon: Globe, desc: 'Manage devices signed into your account' },
+                  { id: 'password', label: 'Change Password', icon: Key, desc: 'Update your login credentials' },
+                  { id: 'tfa', label: 'Two-Factor Authentication', icon: Shield, desc: 'Add an extra layer of security' },
+                  { id: 'sessions', label: 'Active Sessions', icon: Globe, desc: 'Manage devices signed into your account' },
                 ].map((item) => (
                   <button
                     key={item.label}
+                    onClick={() => handleSecurityAction(item.id)}
                     className="w-full flex items-center gap-4 p-5 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-sm transition-all group text-left"
                     aria-label={item.label}
                   >

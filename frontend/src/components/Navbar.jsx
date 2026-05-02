@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns';
+import { USER_MAP } from '../utils/userMapping';
 
 const NavLinks = ({ links, location, isMobile, closeMenu }) => (
   <div className={`flex ${isMobile ? 'flex-col w-full gap-4 p-4' : 'items-center gap-1'}`}>
@@ -156,6 +157,8 @@ const UserActions = ({ isAuthenticated, user, isMobile }) => {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const { unreadCount } = useSelector((state) => state.notification);
   if (!isAuthenticated) return null;
+
+  const displayUser = USER_MAP[user?.id] || {};
 
   const userAvatar = localStorage.getItem(`vanguard_avatar_${user?.id}`) || null;
   const userStyle = localStorage.getItem(`vanguard_style_${user?.id}`) || 'avataaars';

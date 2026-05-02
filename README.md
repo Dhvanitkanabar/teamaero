@@ -1,5 +1,7 @@
 # 🚀 Vanguard AERO — Squadron Operations Command Center
 
+**Live Command Link**: [https://teamaero.vercel.app/](https://teamaero.vercel.app/)
+
 Vanguard AERO is a high-fidelity, interactive management platform engineered to orchestrate team-based activities within a decentralized squadron environment. It transitions unstructured community communication into a high-density, automated workflow: **Discuss → Vote → Schedule → Play → Track**.
 
 ---
@@ -42,6 +44,11 @@ AERO provides a centralized, **Identity-First** portal that serves as the "sourc
 ### 🎨 Atmospheric Immersion
 *   **AeroSky Engine**: A 3D atmospheric simulation built with Three.js that reacts to navigation state.
 *   **Glassmorphic Design System**: Custom-built UI components featuring deep blur, metallic borders, and vibrant HSL color palettes.
+
+### ⚡ Production Persistence & Sync (New)
+*   **Session Rehydration**: Advanced auth state management that prevents unwanted logouts on page refresh.
+*   **Shared Message Buffer**: A global backend message history (last 100 entries) that automatically hydrates the chat for all users.
+*   **Identity First**: Centralized user mapping that synchronizes official squadron photos and custom avatars globally in real-time.
 
 ---
 
